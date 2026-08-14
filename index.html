@@ -158,6 +158,33 @@
 
   .hidden{display:none}
   @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+
+  /* Ventanas emergentes (hoja inferior) */
+  .modal-bg{position:fixed;inset:0;z-index:50;background:rgba(58,50,42,.45);display:flex;align-items:flex-end;justify-content:center}
+  .modal-bg.hidden{display:none}
+  .modal{background:var(--paper);width:100%;max-width:560px;max-height:92vh;overflow-y:auto;border-radius:30px 30px 0 0;padding:0 16px 28px;box-shadow:0 -8px 40px rgba(58,50,42,.22);animation:sheet .26s cubic-bezier(.22,1,.36,1)}
+  @keyframes sheet{from{transform:translateY(40px)}to{transform:translateY(0)}}
+  .modal-grip{width:42px;height:5px;border-radius:3px;background:#D6CDBE;margin:10px auto 0}
+  .modal-head{position:sticky;top:0;background:var(--paper);display:flex;align-items:center;justify-content:space-between;padding:12px 2px 12px;z-index:3}
+  .modal-head h2{font-size:19px;font-weight:600}
+  .modal-x{width:34px;height:34px;border-radius:50%;border:0;background:var(--surface);color:var(--muted);font-size:15px;cursor:pointer;box-shadow:var(--shadow);flex:0 0 auto}
+  .modal .form{box-shadow:none;background:var(--surface);margin-top:6px}
+  .modal .add{margin-top:12px}
+  .m-sub{font-size:13px;color:var(--muted);margin:-4px 2px 12px}
+
+  /* Detalle de pendiente */
+  .pd-row{display:flex;align-items:center;gap:12px;padding:13px 2px;border-top:1px solid var(--line)}
+  .pd-row:first-child{border-top:0}
+  .pd-day{width:46px;height:46px;border-radius:15px;background:var(--surface);display:flex;flex-direction:column;align-items:center;justify-content:center;box-shadow:var(--shadow);flex:0 0 auto}
+  .pd-day b{font-size:17px;font-weight:600;line-height:1;color:var(--ink)}
+  .pd-day small{font-size:8.5px;color:var(--faint);text-transform:uppercase;letter-spacing:.04em;margin-top:2px}
+  .pd-info{flex:1;min-width:0}
+  .pd-name{font-weight:600;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .pd-cat{font-size:12px;color:var(--muted);margin-top:3px;display:flex;align-items:center;gap:7px}
+  .pd-amt{font-weight:600;font-size:15px;color:var(--gasto);white-space:nowrap}
+  .pd-total{display:flex;justify-content:space-between;align-items:center;margin-top:16px;padding:14px 16px;background:var(--gasto-soft);border-radius:18px;font-weight:700;color:var(--gasto)}
+  .pd-total b{font-size:18px}
+  .pend-row .go{color:var(--efeoro);opacity:.7;font-size:15px;margin-left:2px}
 </style>
 </head>
 <body>
@@ -166,16 +193,16 @@
       <div class="hh-title">Hola, Juan</div>
       <div class="hh-sub">tu dinero, en calma</div>
     </div>
-    <button class="gold-btn" onclick="qAdd('extra')" aria-label="Apuntar gasto extra">+</button>
+    <button class="gold-btn" onclick="openExtras()" aria-label="Apuntar gasto extra">+</button>
   </div>
 
   <div class="hero-num num" id="heroLibre">—</div>
   <div class="hero-cap" id="heroCap">libres tras los cobros de este mes</div>
 
   <div class="quick">
-    <button class="q" onclick="qAdd('ingreso')"><span class="ic">€</span><span class="lb">Ingreso</span></button>
-    <button class="q" onclick="qAdd('fijo')"><span class="ic">↻</span><span class="lb">Fijo</span></button>
-    <button class="q" onclick="qAdd('extra')"><span class="ic">+</span><span class="lb">Extra</span></button>
+    <button class="q" onclick="openIngresos()"><span class="ic">€</span><span class="lb">Ingreso</span></button>
+    <button class="q" onclick="openFijos()"><span class="ic">↻</span><span class="lb">Fijo</span></button>
+    <button class="q" onclick="openExtras()"><span class="ic">+</span><span class="lb">Extra</span></button>
     <button class="q" onclick="openSaldos()"><span class="ic">⚙</span><span class="lb">Saldos</span></button>
   </div>
 
@@ -212,53 +239,11 @@
         <button class="pn-btn" onclick="pendShift(1)" aria-label="Mes siguiente">›</button>
       </span>
     </div>
-    <div class="pend-row" onclick="pendShift(1)"><span class="bk"><i class="dt dt-ing"></i>ING</span><span class="pc-cnt" id="ingPendN"></span><b class="num" id="ingPend">—</b></div>
-    <div class="pend-row" onclick="pendShift(1)"><span class="bk"><i class="dt dt-uni"></i>UNICAJA</span><span class="pc-cnt" id="uniPendN"></span><b class="num" id="uniPend">—</b></div>
-    <div class="pend-row" onclick="pendShift(1)"><span class="bk"><i class="dt dt-efe"></i>EFECTIVO</span><span class="pc-cnt" id="efePendN"></span><b class="num" id="efePend">—</b></div>
+    <div class="pend-row" onclick="openPendDetail('ing')"><span class="bk"><i class="dt dt-ing"></i>ING</span><span class="pc-cnt" id="ingPendN"></span><b class="num" id="ingPend">—</b><span class="go">›</span></div>
+    <div class="pend-row" onclick="openPendDetail('unicaja')"><span class="bk"><i class="dt dt-uni"></i>UNICAJA</span><span class="pc-cnt" id="uniPendN"></span><b class="num" id="uniPend">—</b><span class="go">›</span></div>
+    <div class="pend-row" onclick="openPendDetail('efectivo')"><span class="bk"><i class="dt dt-efe"></i>EFECTIVO</span><span class="pc-cnt" id="efePendN"></span><b class="num" id="efePend">—</b><span class="go">›</span></div>
   </div>
   <div class="futuro-line hidden" id="heroFuturo"></div>
-
-  <div class="saldos-line">
-    <button class="tot-edit" id="saldosBtn" onclick="openSaldos()">Ajustar saldos iniciales</button>
-  </div>
-  <div id="formSaldosSlot"></div>
-
-  <div class="tabs">
-    <button class="tab active" id="tabIngresos" onclick="setTab('ingresos')">Ingresos</button>
-    <button class="tab" id="tabFijos" onclick="setTab('fijos')">Fijos</button>
-    <button class="tab" id="tabExtras" onclick="setTab('extras')">Extra</button>
-  </div>
-
-  <!-- INGRESOS -->
-  <section id="secIngresos">
-    <div class="sec-head"><h2>Entradas</h2><span class="cnt" id="cntIngresos"></span></div>
-    <div class="list" id="listIngresos"></div>
-    <div id="formIngresoSlot"></div>
-    <button class="add in" id="addIngresoBtn" onclick="openForm('ingreso')">+ Apuntar ingreso</button>
-  </section>
-
-  <!-- FIJOS -->
-  <section id="secFijos" class="hidden">
-    <div class="sec-head"><h2>Recurrentes</h2><span class="cnt" id="cntFijos"></span></div>
-    <div class="list" id="listFijos"></div>
-    <div id="formFijoSlot"></div>
-    <button class="add" id="addFijoBtn" onclick="openForm('fijo')">+ Añadir gasto fijo</button>
-  </section>
-
-  <!-- EXTRAS -->
-  <section id="secExtras" class="hidden">
-    <div class="ex-head">
-      <div class="sh-l"><h2>Puntuales</h2><span class="cnt" id="cntExtras"></span></div>
-      <span class="pn-ctrl">
-        <button class="pn-btn" onclick="exShift(-1)" aria-label="Mes anterior">‹</button>
-        <b class="mes-lbl" id="exMesLbl">este mes</b>
-        <button class="pn-btn" onclick="exShift(1)" aria-label="Mes siguiente">›</button>
-      </span>
-    </div>
-    <div class="list" id="listExtras"></div>
-    <div id="formExtraSlot"></div>
-    <button class="add ex" id="addExtraBtn" onclick="openForm('extra')">+ Apuntar gasto extra</button>
-  </section>
 
   <div class="footer">
     <div id="backupSlot"></div>
@@ -343,12 +328,135 @@ async function save(){
 }
 
 const cap=s=>s[0].toUpperCase()+s.slice(1);
-function setTab(t){
-  tab=t;closeForm();
-  ['ingresos','fijos','extras'].forEach(x=>{
-    document.getElementById('sec'+cap(x)).classList.toggle('hidden',x!==t);
-    document.getElementById('tab'+cap(x)).classList.toggle('active',x===t);
+
+/* ---------- Ventanas emergentes ---------- */
+let currentModal=null;
+function openModal(title,html){
+  document.getElementById('modalTitle').textContent=title;
+  document.getElementById('modalBody').innerHTML=html;
+  document.getElementById('modalBg').classList.remove('hidden');
+  document.body.style.overflow='hidden';
+}
+function closeModal(){
+  document.getElementById('modalBg').classList.add('hidden');
+  document.getElementById('modalBody').innerHTML='';
+  document.body.style.overflow='';
+  editing=null;currentModal=null;
+}
+function closeModalBg(e){if(e.target===document.getElementById('modalBg'))closeModal();}
+function refreshModal(){
+  if(currentModal==='ingresos')fillIngresos();
+  else if(currentModal==='fijos')fillFijos();
+  else if(currentModal==='extras')fillExtras();
+}
+const shell=(addCls,addTxt,type)=>`<div id="mList"></div><div id="mSlot"></div><button class="add ${addCls}" id="mAdd" onclick="openForm('${type}')">${addTxt}</button>`;
+
+/* Ingresos: lista + añadir */
+function openIngresos(){currentModal='ingresos';openModal('Ingresos',shell('in','+ Apuntar ingreso','ingreso'));fillIngresos();}
+function fillIngresos(){
+  const now=new Date();
+  const ingAno=data.ingresos.filter(i=>new Date(i.date).getFullYear()===now.getFullYear()).reduce((s,i)=>s+netoOf(i),0);
+  const L=document.getElementById('mList');if(!L)return;
+  if(!data.ingresos.length){L.innerHTML='<div class="empty"><b>Sin ingresos apuntados</b>Apunta cada factura: base y porcentajes de IVA y retención. Te calcula el neto que de verdad te queda.</div>';return;}
+  L.innerHTML='<div class="m-sub">'+data.ingresos.length+' · '+eur(ingAno)+' neto este año</div><div class="list"></div>';
+  const box=L.querySelector('.list');
+  [...data.ingresos].sort((a,b)=>new Date(b.date)-new Date(a.date)).forEach(i=>{
+    const el=document.createElement('div');el.className='item';
+    el.innerHTML=`<div class="body"><div class="name">${esc(i.name)}</div>
+      <div class="meta"><span class="chip in">${fmtDate(i.date)}</span>${payChip(i.pay)}<span class="freq">Base ${eur(i.base)} · IVA ${eur(ivaOf(i))} · Ret. −${eur(retOf(i))}</span></div></div>
+      <div class="amt num verde">${eur(netoOf(i))}<small>neto</small></div>
+      <div class="row-actions"><button class="icon-btn" onclick="edit('ingreso','${i.id}')" aria-label="Editar">✎</button>${delBtn('ingreso',i.id)}</div>`;
+    box.appendChild(el);
   });
+}
+
+/* Fijos: lista + añadir (doble función) */
+function openFijos(){currentModal='fijos';openModal('Gastos fijos',shell('','+ Añadir gasto fijo','fijo'));fillFijos();}
+function fillFijos(){
+  const fijoMes=data.recurrentes.reduce((s,r)=>s+monthEq(r),0);
+  const L=document.getElementById('mList');if(!L)return;
+  if(!data.recurrentes.length){L.innerHTML='<div class="empty"><b>Aún no hay gastos fijos</b>Añade hipoteca o alquiler, suministros, seguros, la cuota de autónomo, suscripciones…</div>';return;}
+  L.innerHTML='<div class="m-sub">'+data.recurrentes.length+' · '+eur(fijoMes)+'/mes</div><div class="list"></div>';
+  const box=L.querySelector('.list');
+  [...data.recurrentes].sort((a,b)=>((a.day||1)-(b.day||1))||monthEq(b)-monthEq(a)).forEach(r=>{
+    const f=FREQS.find(x=>x[0]===r.freq)||FREQS[0];
+    const el=document.createElement('div');el.className='item';
+    el.innerHTML=`<div class="body"><div class="name">${esc(r.name)}</div>
+      <div class="meta"><span class="chip">${esc(r.category||'Otros')}</span>${payChip(r.pay)}<span class="freq">día ${r.day||1} · ${eur(r.amount)} ${f[1]}</span></div></div>
+      <div class="amt num gasto">${eur(monthEq(r))}<small>/mes</small></div>
+      <div class="row-actions"><button class="icon-btn" onclick="edit('fijo','${r.id}')" aria-label="Editar">✎</button>${delBtn('fijo',r.id)}</div>`;
+    box.appendChild(el);
+  });
+}
+
+/* Extras: navegador de mes + lista + añadir */
+function openExtras(){currentModal='extras';openModal('Gastos puntuales',
+  `<div class="ex-head" style="margin:2px 0 12px">
+     <div class="sh-l"><h2 style="font-size:15px">Puntuales</h2><span class="cnt" id="exCnt"></span></div>
+     <span class="pn-ctrl">
+       <button class="pn-btn" onclick="exShift(-1)" aria-label="Mes anterior">‹</button>
+       <b class="mes-lbl" id="exMesLbl">este mes</b>
+       <button class="pn-btn" onclick="exShift(1)" aria-label="Mes siguiente">›</button>
+     </span>
+   </div>`+shell('ex','+ Apuntar gasto extra','extra'));
+  fillExtras();
+}
+function fillExtras(){
+  const now=new Date(),y=now.getFullYear(),m=now.getMonth();
+  const exTgt=new Date(y,m+exOffset,1),exY=exTgt.getFullYear(),exM=exTgt.getMonth();
+  const exVis=data.extras.filter(e=>{const x=new Date(e.date);return x.getFullYear()===exY&&x.getMonth()===exM;});
+  const exSum=exVis.reduce((s,e)=>s+(Number(e.amount)||0),0);
+  const lbl=document.getElementById('exMesLbl');if(lbl)lbl.textContent=mesLbl(exOffset,now);
+  const cnt=document.getElementById('exCnt');if(cnt)cnt.textContent=exVis.length?exVis.length+' · '+eur(exSum):'';
+  const L=document.getElementById('mList');if(!L)return;
+  if(!exVis.length){L.innerHTML='<div class="empty"><b>Sin gastos extra en '+(exOffset===0?'este mes':mesLbl(exOffset,now))+'</b>Usa las flechas para ver otros meses, o apunta aquí un gasto puntual.</div>';return;}
+  L.innerHTML='<div class="list"></div>';
+  const box=L.querySelector('.list');
+  [...exVis].sort((a,b)=>new Date(a.date)-new Date(b.date)).forEach(e=>{
+    const el=document.createElement('div');el.className='item';
+    el.innerHTML=`<div class="body"><div class="name">${esc(e.name)}</div>
+      <div class="meta"><span class="chip ex">${esc(e.category||'Otros')}</span>${payChip(e.pay)}<span class="freq">${fmtDate(e.date)}${e.note?' · '+esc(e.note):''}</span></div></div>
+      <div class="amt num gasto">${eur(e.amount)}</div>
+      <div class="row-actions"><button class="icon-btn" onclick="edit('extra','${e.id}')" aria-label="Editar">✎</button>${delBtn('extra',e.id)}</div>`;
+    box.appendChild(el);
+  });
+}
+
+/* Detalle de lo pendiente de una caja en el mes seleccionado */
+function pendItems(pay){
+  const now=new Date(),y=now.getFullYear(),m=now.getMonth();
+  const hoyDia=now.getDate(),todayStr=isoD(now);
+  const tgt=new Date(y,m+pendOffset,1),ty=tgt.getFullYear(),tm=tgt.getMonth();
+  const eom=new Date(ty,tm+1,0).getDate();
+  const inTgt=d=>{const x=new Date(d);return x.getFullYear()===ty&&x.getMonth()===tm;};
+  const items=[];
+  data.recurrentes.filter(r=>(r.pay||'ing')===pay).forEach(r=>{
+    const dia=Math.min(Number(r.day)||1,eom);
+    if(pendOffset===0?dia>hoyDia:true)items.push({dia,concepto:r.name,cat:r.category||'Otros',importe:monthEq(r),tipo:'Fijo'});
+  });
+  data.extras.filter(e=>(e.pay||'ing')===pay&&inTgt(e.date)).forEach(e=>{
+    if(pendOffset===0?e.date>todayStr:true){const dia=new Date(e.date+'T00:00:00').getDate();items.push({dia,concepto:e.name,cat:e.category||'Otros',importe:Number(e.amount)||0,tipo:'Extra'});}
+  });
+  return items.sort((a,b)=>a.dia-b.dia);
+}
+function openPendDetail(pay){
+  const now=new Date();
+  const items=pendItems(pay);
+  const total=items.reduce((s,x)=>s+x.importe,0);
+  const cajaLbl=pay==='efectivo'?'Efectivo':pay==='unicaja'?'Unicaja':'ING';
+  const cuando=pendOffset===0?'este mes':mesLbl(pendOffset,now);
+  let html='<div class="m-sub">Lo que te queda por pagar en '+cuando+' desde '+cajaLbl+'</div>';
+  if(!items.length){
+    html+='<div class="empty"><b>Nada pendiente</b>No queda ningún cobro por salir de '+cajaLbl+' en '+cuando+'.</div>';
+  }else{
+    html+=items.map(x=>`<div class="pd-row">
+        <div class="pd-day"><b>${x.dia}</b><small>día</small></div>
+        <div class="pd-info"><div class="pd-name">${esc(x.concepto)}</div><div class="pd-cat">${esc(x.cat)} · ${x.tipo}</div></div>
+        <div class="pd-amt">${eur(x.importe)}</div>
+      </div>`).join('');
+    html+='<div class="pd-total"><span>Total pendiente</span><b>'+eur(total)+'</b></div>';
+  }
+  openModal('Pendiente · '+cajaLbl,html);
 }
 
 function render(){
@@ -432,12 +540,10 @@ function render(){
     });
     document.getElementById('heroLibre').textContent=eur(libreT);
     document.getElementById('heroCap').textContent='libres tras los cobros de este mes';
-    document.getElementById('saldosBtn').textContent='Ajustar saldos iniciales ('+fmtDate(desde)+')';
   }else{
     ['ingDisp','uniDisp','efeDisp','ingQueda','uniQueda','efeQueda'].forEach(id=>document.getElementById(id).textContent='\u2014');
     document.getElementById('heroLibre').textContent='\u2014';
     document.getElementById('heroCap').textContent='fija tus saldos para ver cu\u00e1nto te queda libre';
-    document.getElementById('saldosBtn').textContent='Empezar: fijar cu\u00e1nto tienes hoy en cada caja';
   }
 
   // Gastos ya apuntados para meses siguientes (no restan a\u00fan, pero se avisan)
@@ -447,74 +553,6 @@ function render(){
   if(futuro>0){hf.classList.remove('hidden');hf.textContent='Comprometido para pr\u00f3ximos meses: '+eur(futuro);}
   else hf.classList.add('hidden');
 
-  // Lista ingresos
-  const li=document.getElementById('listIngresos');li.innerHTML='';
-  document.getElementById('cntIngresos').textContent=data.ingresos.length?`${data.ingresos.length} · ${eur(ingAno)} neto este año`:'';
-  if(!data.ingresos.length){
-    li.innerHTML='<div class="empty"><b>Sin ingresos apuntados</b>Apunta cada factura: pon la base y los porcentajes de IVA y retención. Te calcula el neto que de verdad te queda.</div>';
-  }else{
-    [...data.ingresos].sort((a,b)=>new Date(b.date)-new Date(a.date)).forEach(i=>{
-      const el=document.createElement('div');el.className='item';
-      el.innerHTML=`<div class="body">
-          <div class="name">${esc(i.name)}</div>
-          <div class="meta"><span class="chip in">${fmtDate(i.date)}</span>${payChip(i.pay)}<span class="freq">Base ${eur(i.base)} · IVA ${eur(ivaOf(i))} · Ret. −${eur(retOf(i))}</span></div>
-        </div>
-        <div class="amt num verde">${eur(netoOf(i))}<small>neto</small></div>
-        <div class="row-actions">
-          <button class="icon-btn" onclick="edit('ingreso','${i.id}')" aria-label="Editar">✎</button>
-          ${delBtn('ingreso',i.id)}
-        </div>`;
-      li.appendChild(el);
-    });
-  }
-
-  // Lista fijos
-  const lf=document.getElementById('listFijos');lf.innerHTML='';
-  document.getElementById('cntFijos').textContent=data.recurrentes.length?`${data.recurrentes.length} · ${eur(fijoMes)}/mes`:'';
-  if(!data.recurrentes.length){
-    lf.innerHTML='<div class="empty"><b>Aún no hay gastos fijos</b>Añade la hipoteca o alquiler, suministros, seguros, la cuota de autónomo, suscripciones…</div>';
-  }else{
-    [...data.recurrentes].sort((a,b)=>((a.day||1)-(b.day||1))||monthEq(b)-monthEq(a)).forEach(r=>{
-      const f=FREQS.find(x=>x[0]===r.freq)||FREQS[0];
-      const el=document.createElement('div');el.className='item';
-      el.innerHTML=`<div class="body">
-          <div class="name">${esc(r.name)}</div>
-          <div class="meta"><span class="chip">${esc(r.category||'Otros')}</span>${payChip(r.pay)}<span class="freq">día ${r.day||1} · ${eur(r.amount)} ${f[1]}</span></div>
-        </div>
-        <div class="amt num gasto">${eur(monthEq(r))}<small>/mes</small></div>
-        <div class="row-actions">
-          <button class="icon-btn" onclick="edit('fijo','${r.id}')" aria-label="Editar">✎</button>
-          ${delBtn('fijo',r.id)}
-        </div>`;
-      lf.appendChild(el);
-    });
-  }
-
-  // Lista extras: solo el mes seleccionado
-  const exTgt=new Date(y,m+exOffset,1);
-  const exY=exTgt.getFullYear(),exM=exTgt.getMonth();
-  const exVis=data.extras.filter(e=>{const x=new Date(e.date);return x.getFullYear()===exY&&x.getMonth()===exM;});
-  const exVisSum=exVis.reduce((s,e)=>s+(Number(e.amount)||0),0);
-  document.getElementById('exMesLbl').textContent=mesLbl(exOffset,now);
-  const le=document.getElementById('listExtras');le.innerHTML='';
-  document.getElementById('cntExtras').textContent=exVis.length?`${exVis.length} · ${eur(exVisSum)}`:'';
-  if(!exVis.length){
-    le.innerHTML='<div class="empty"><b>Sin gastos extra en '+(exOffset===0?'este mes':mesLbl(exOffset,now))+'</b>Usa las flechas para ver otros meses, o apunta aquí un gasto puntual.</div>';
-  }else{
-    [...exVis].sort((a,b)=>new Date(a.date)-new Date(b.date)).forEach(e=>{
-      const el=document.createElement('div');el.className='item';
-      el.innerHTML=`<div class="body">
-          <div class="name">${esc(e.name)}</div>
-          <div class="meta"><span class="chip ex">${esc(e.category||'Otros')}</span>${payChip(e.pay)}<span class="freq">${fmtDate(e.date)}${e.note?' · '+esc(e.note):''}</span></div>
-        </div>
-        <div class="amt num gasto">${eur(e.amount)}</div>
-        <div class="row-actions">
-          <button class="icon-btn" onclick="edit('extra','${e.id}')" aria-label="Editar">✎</button>
-          ${delBtn('extra',e.id)}
-        </div>`;
-      le.appendChild(el);
-    });
-  }
 }
 
 function esc(s){return String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
@@ -523,13 +561,11 @@ function fmtDate(d){try{return new Date(d).toLocaleDateString('es-ES',{day:'2-di
 function catOptions(sel){return CATS.map(c=>`<option ${c===sel?'selected':''}>${c}</option>`).join('');}
 function payOptions(sel){return PAYS.map(p=>`<option value="${p[0]}" ${p[0]===(sel||'ing')?'selected':''}>${p[1]}</option>`).join('');}
 
-const SLOT={fijo:'formFijoSlot',extra:'formExtraSlot',ingreso:'formIngresoSlot'};
-const ADDB={fijo:'addFijoBtn',extra:'addExtraBtn',ingreso:'addIngresoBtn'};
 function openForm(type,item){
   closeForm();
   editing=item?{type,id:item.id}:null;
-  const slot=document.getElementById(SLOT[type]);
-  document.getElementById(ADDB[type]).classList.add('hidden');
+  const slot=document.getElementById('mSlot');
+  const addBtn=document.getElementById('mAdd');if(addBtn)addBtn.classList.add('hidden');
   const today=isoD(new Date());
   const nw=new Date();
   const exDef=exOffset===0?today:isoD(new Date(nw.getFullYear(),nw.getMonth()+exOffset,1));
@@ -597,10 +633,9 @@ function openForm(type,item){
 }
 function closeForm(){
   editing=null;
-  Object.values(SLOT).forEach(id=>document.getElementById(id).innerHTML='');
-  document.getElementById('formSaldosSlot').innerHTML='';
-  document.getElementById('backupSlot').innerHTML='';
-  Object.values(ADDB).forEach(id=>document.getElementById(id).classList.remove('hidden'));
+  const slot=document.getElementById('mSlot');if(slot)slot.innerHTML='';
+  const addBtn=document.getElementById('mAdd');if(addBtn)addBtn.classList.remove('hidden');
+  const bk=document.getElementById('backupSlot');if(bk)bk.innerHTML='';
 }
 function payChanged(){
   const p=document.getElementById('i_pay').value;
@@ -624,7 +659,7 @@ async function saveFijo(){
   const obj={name,amount,freq:val('f_freq'),category:val('f_cat'),pay:val('f_pay'),day};
   if(editing){const r=data.recurrentes.find(x=>x.id===editing.id);Object.assign(r,obj);}
   else{data.recurrentes.push({id:uid(),...obj});}
-  await save();closeForm();render();
+  await save();closeForm();refreshModal();render();
 }
 async function saveExtra(){
   const name=val('e_name'),amount=parseFloat(val('e_amount'));
@@ -634,7 +669,7 @@ async function saveExtra(){
   else{data.extras.push({id:uid(),...obj});}
   const dd=new Date(obj.date+'T00:00:00'),nn=new Date();
   exOffset=Math.max(-24,Math.min(12,(dd.getFullYear()-nn.getFullYear())*12+(dd.getMonth()-nn.getMonth())));
-  await save();closeForm();render();
+  await save();closeForm();refreshModal();render();
 }
 async function saveIngreso(){
   const name=val('i_name'),base=parseFloat(val('i_base'));
@@ -642,15 +677,13 @@ async function saveIngreso(){
   const obj={name,base,ivaPct:parseFloat(val('i_iva'))||0,retPct:parseFloat(val('i_ret'))||0,date:val('i_date'),pay:val('i_pay')};
   if(editing){const i=data.ingresos.find(x=>x.id===editing.id);Object.assign(i,obj);}
   else{data.ingresos.push({id:uid(),...obj});}
-  await save();closeForm();render();
+  await save();closeForm();refreshModal();render();
 }
 function openSaldos(){
-  closeForm();
-  const slot=document.getElementById('formSaldosSlot');
+  currentModal='saldos';
   const s=data.saldos||{};
   const today=new Date().toISOString().slice(0,10);
-  slot.innerHTML=`<div class="form" style="margin-top:10px">
-    <h3>Saldos iniciales</h3>
+  openModal('Saldos iniciales',`<div class="form" style="margin-top:2px">
     <div class="two">
       <div class="field"><label>ING (€)</label><input id="s_ing" type="number" inputmode="decimal" step="0.01" placeholder="0,00" value="${s.ing??''}"></div>
       <div class="field"><label>Unicaja (€)</label><input id="s_uni" type="number" inputmode="decimal" step="0.01" placeholder="0,00" value="${s.unicaja??''}"></div>
@@ -659,17 +692,17 @@ function openSaldos(){
     <div class="field"><label>Fecha del saldo</label><input id="s_desde" type="date" value="${s.desde||today}"></div>
     <div class="tot-note">Pon lo que tienes hoy en el banco y en la cartera. A partir de esa fecha, la app suma ingresos y resta gastos para calcular el total. Lo apuntado con fecha futura no descuenta hasta que llegue el día.</div>
     <div class="form-actions">
-      <button class="btn" onclick="closeForm()">Cancelar</button>
+      <button class="btn" onclick="closeModal()">Cancelar</button>
       <button class="btn primary" onclick="saveSaldos()">Guardar</button>
     </div>
-  </div>`;
+  </div>`);
   document.getElementById('s_ing').focus();
 }
 async function saveSaldos(){
   const i=parseFloat(val('s_ing')),u=parseFloat(val('s_uni')),c=parseFloat(val('s_cash'));
   if(isNaN(i)&&isNaN(u)&&isNaN(c)){formErr('Pon al menos uno de los saldos.');return;}
   data.saldos={ing:isNaN(i)?0:i,unicaja:isNaN(u)?0:u,efectivo:isNaN(c)?0:c,desde:val('s_desde')};
-  await save();closeForm();render();
+  await save();closeModal();render();
 }
 function val(id){return document.getElementById(id).value.trim();}
 function formErr(msg){
@@ -684,10 +717,9 @@ function edit(type,id){
   if(item)openForm(type,item);
 }
 let pendOffset=0; // 0 = mes actual; 1 = mes siguiente...
-function pendShift(d){pendOffset=Math.max(0,Math.min(11,pendOffset+d));exOffset=pendOffset;render();}
-function qAdd(t){setTab(t==='ingreso'?'ingresos':t==='fijo'?'fijos':'extras');openForm(t);}
+function pendShift(d){pendOffset=Math.max(0,Math.min(11,pendOffset+d));render();}
 let exOffset=0; // mes visible en la lista de extras
-function exShift(d){exOffset=Math.max(-24,Math.min(12,exOffset+d));render();}
+function exShift(d){exOffset=Math.max(-24,Math.min(12,exOffset+d));fillExtras();}
 const isoD=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
 const mesLbl=(off,base)=>{if(off===0)return 'este mes';const t=new Date(base.getFullYear(),base.getMonth()+off,1);return t.toLocaleDateString('es-ES',{month:'long'})+(t.getFullYear()!==base.getFullYear()?' '+t.getFullYear():'');};
 let pendingDel=null,pendingTimer=null;
@@ -699,14 +731,14 @@ async function del(type,id){
   const key=type+':'+id;
   if(pendingDel!==key){
     pendingDel=key;clearTimeout(pendingTimer);
-    pendingTimer=setTimeout(()=>{pendingDel=null;render();},4000);
-    render();return;
+    pendingTimer=setTimeout(()=>{pendingDel=null;refreshModal();},4000);
+    refreshModal();return;
   }
   pendingDel=null;clearTimeout(pendingTimer);
   if(type==='fijo')data.recurrentes=data.recurrentes.filter(x=>x.id!==id);
   else if(type==='extra')data.extras=data.extras.filter(x=>x.id!==id);
   else data.ingresos=data.ingresos.filter(x=>x.id!==id);
-  await save();render();
+  await save();refreshModal();render();
 }
 async function borrarTodo(){
   const btn=document.getElementById('wipeBtn');
@@ -748,5 +780,13 @@ if('serviceWorker' in navigator && location.protocol==='https:'){
 }
 load();
 </script>
+
+<div class="modal-bg hidden" id="modalBg" onclick="closeModalBg(event)">
+  <div class="modal" id="modalCard">
+    <div class="modal-grip"></div>
+    <div class="modal-head"><h2 id="modalTitle"></h2><button class="modal-x" onclick="closeModal()" aria-label="Cerrar">✕</button></div>
+    <div id="modalBody"></div>
+  </div>
+</div>
 </body>
 </html>
