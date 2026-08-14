@@ -29,7 +29,7 @@
   *{box-sizing:border-box;margin:0;padding:0}
   html{background:#E9E3DA}
   html,body{background:#E9E3DA;color:var(--ink);font-family:'Inter',system-ui,sans-serif;-webkit-font-smoothing:antialiased;forced-color-adjust:none}
-  body{max-width:560px;margin:0 auto;padding:22px 16px 96px;min-height:100vh;position:relative}
+  body{max-width:560px;margin:0 auto;padding:18px 16px 24px;min-height:100vh;position:relative}
   body::before{content:'';position:fixed;left:0;top:0;right:0;bottom:0;z-index:-1;pointer-events:none;
     background:#E9E3DA;
     background-image:radial-gradient(560px 460px at -12% 22%,rgba(206,192,174,.45),transparent 70%),
@@ -39,16 +39,16 @@
 
   /* Cabecera */
   .app-head{display:flex;align-items:flex-start;justify-content:space-between}
-  .hh-title{font-size:25px;font-weight:700;letter-spacing:-.01em}
+  .hh-title{font-size:23px;font-weight:700;letter-spacing:-.01em}
   .hh-sub{font-size:13px;color:var(--muted);margin-top:3px}
   .gold-btn{width:46px;height:46px;border-radius:50%;border:0;background:var(--oro);color:#FFF9EE;font-size:24px;font-weight:600;cursor:pointer;box-shadow:var(--shadow);line-height:1}
-  .hero-num{font-size:52px;font-weight:300;letter-spacing:-.02em;margin-top:22px}
+  .hero-num{font-size:44px;font-weight:300;letter-spacing:-.02em;margin-top:12px}
   .hero-cap{font-size:13px;color:var(--muted);margin-top:2px}
 
   /* Accesos rápidos */
-  .quick{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:20px}
+  .quick{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:14px}
   .q{display:flex;flex-direction:column;align-items:center;gap:7px;background:none;border:0;cursor:pointer;font-family:inherit;padding:0}
-  .q .ic{width:56px;height:56px;border-radius:50%;background:var(--surface);box-shadow:var(--shadow);display:flex;align-items:center;justify-content:center;font-size:20px;color:var(--moca);font-weight:600}
+  .q .ic{width:52px;height:52px;border-radius:50%;background:var(--surface);box-shadow:var(--shadow);display:flex;align-items:center;justify-content:center;font-size:19px;color:var(--moca);font-weight:600}
   .q .lb{font-size:12px;font-weight:600;color:var(--muted)}
 
   /* Puntos de identidad */
@@ -56,13 +56,13 @@
   .dt-ing{background:var(--teja)} .dt-uni{background:var(--salvia)} .dt-efe{background:var(--oro)}
 
   /* Paneles */
-  .paneles{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:22px}
-  .panel{background:var(--surface);border-radius:28px;padding:18px 18px 10px;box-shadow:var(--shadow)}
+  .paneles{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
+  .panel{background:var(--surface);border-radius:26px;padding:15px 16px 7px;box-shadow:var(--shadow)}
   .panel.span2{grid-column:1/-1}
   .p-title{font-size:12px;font-weight:700;letter-spacing:.08em;color:var(--muted);display:flex;align-items:center}
-  .p-big{font-size:29px;font-weight:300;letter-spacing:-.01em;margin-top:8px}
-  .p-cap{font-size:11.5px;color:var(--faint);margin:2px 0 10px}
-  .p-row{display:flex;justify-content:space-between;align-items:baseline;gap:6px;font-size:12.5px;color:var(--muted);padding:8px 0;border-top:1px solid var(--line)}
+  .p-big{font-size:26px;font-weight:300;letter-spacing:-.01em;margin-top:6px}
+  .p-cap{font-size:11.5px;color:var(--faint);margin:2px 0 7px}
+  .p-row{display:flex;justify-content:space-between;align-items:baseline;gap:6px;font-size:12.5px;color:var(--muted);padding:6px 0;border-top:1px solid var(--line)}
   .p-row b{font-weight:600;color:var(--ink);white-space:nowrap}
   .pos{color:var(--ingreso)!important}
   .neg{color:var(--gasto)!important}
@@ -75,12 +75,12 @@
   .pn-btn{width:34px;height:34px;border-radius:50%;border:0;background:var(--surface);color:var(--moca);cursor:pointer;font-size:16px;line-height:1;display:flex;align-items:center;justify-content:center;padding:0;box-shadow:var(--shadow)}
 
   /* Pendiente: tarjeta moca */
-  .pend-block{background:rgba(95,79,65,.96);border-radius:28px;padding:16px 20px 6px;margin-top:16px;box-shadow:var(--shadow)}
+  .pend-block{background:rgba(95,79,65,.96);border-radius:26px;padding:13px 18px 4px;margin-top:12px;box-shadow:var(--shadow)}
   .pend-head{display:flex;align-items:center;justify-content:space-between;padding-bottom:10px}
   .pend-head .pn-title{font-size:15px;font-weight:700;color:#F6F1E8}
   .pend-head .mes-lbl{color:#E8DECF}
   .pend-head .pn-btn{box-shadow:none}
-  .pend-row{display:grid;grid-template-columns:106px 1fr auto;align-items:center;column-gap:10px;padding:11px 0;border-top:1px solid rgba(246,241,232,.16);font-size:13px;font-weight:600;color:#EFE5D6;cursor:pointer}
+  .pend-row{display:grid;grid-template-columns:106px 1fr auto;align-items:center;column-gap:10px;padding:9px 0;border-top:1px solid rgba(246,241,232,.16);font-size:13px;font-weight:600;color:#EFE5D6;cursor:pointer}
   .pend-row .pc-cnt{color:#BFB09C;font-weight:500;font-size:12px}
   .pend-row b{font-size:16px;text-align:right;color:#EFC7A9}
   .bk{display:flex;align-items:center;font-size:12.5px;font-weight:700;letter-spacing:.05em}
@@ -152,9 +152,6 @@
   .btn{flex:1;font-family:inherit;font-weight:600;font-size:14px;padding:12px;border-radius:22px;cursor:pointer;border:1px solid var(--line);background:#fff;color:var(--muted)}
   .btn.primary{background:var(--moca-d);color:#F6F1E8;border-color:var(--moca-d)}
 
-  .footer{text-align:center;margin-top:30px}
-  .link{background:none;border:0;color:var(--faint);font-family:inherit;font-size:12px;cursor:pointer;text-decoration:underline;text-underline-offset:2px}
-  .link:hover{color:var(--danger)}
 
   .hidden{display:none}
   @media (prefers-reduced-motion:reduce){*{transition:none!important}}
@@ -185,6 +182,35 @@
   .pd-total{display:flex;justify-content:space-between;align-items:center;margin-top:16px;padding:14px 16px;background:var(--gasto-soft);border-radius:18px;font-weight:700;color:var(--gasto)}
   .pd-total b{font-size:18px}
   .pend-row .go{color:var(--efeoro);opacity:.7;font-size:15px;margin-left:2px}
+
+  /* Comprometido: clicable */
+  .futuro-line{display:flex;align-items:center;justify-content:space-between;cursor:pointer}
+  .futuro-line .go{color:var(--efeoro);opacity:.65;font-size:15px}
+  /* Detalle pendiente: fijo vs extra por fondo */
+  .pd-row.box{border-top:0;border-radius:15px;margin-top:7px;padding:11px 12px}
+  .pd-row.box:first-child{margin-top:0}
+  .pd-fijo{background:#F1EADD}
+  .pd-extra{background:#F4E6DA}
+  .pd-legend{display:flex;gap:16px;margin:0 2px 12px;font-size:11.5px;color:var(--muted)}
+  .pd-legend i{display:inline-block;width:12px;height:12px;border-radius:4px;vertical-align:-2px;margin-right:5px}
+  /* Puntuales: pagado vs por pagar */
+  .item.pagado{opacity:.66}
+  .item.porpagar{background:#F6EADF;border:1px solid #ECD8C7}
+  .amt small.st{display:block;font-size:10px;font-weight:600;margin-top:2px}
+  .amt small.stp{color:var(--efeoro)} .amt small.stc{color:var(--faint)}
+  /* Filtro de categoría */
+  .cat-filter{width:100%;font-family:inherit;font-size:13px;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:9px 12px;margin-bottom:10px;box-shadow:var(--shadow)}
+  /* Detalle comprometido por mes */
+  .fm-group{margin-top:14px}
+  .fm-group:first-child{margin-top:4px}
+  .fm-head{display:flex;justify-content:space-between;align-items:baseline;font-weight:700;color:var(--ink);font-size:14px;margin-bottom:6px;text-transform:capitalize}
+  .fm-head b{color:var(--gasto)}
+  /* Ajustes */
+  .aj-sep{height:1px;background:var(--line);margin:20px 0 14px}
+  .aj-h{font-size:12px;font-weight:700;letter-spacing:.06em;color:var(--muted);margin-bottom:10px;text-transform:uppercase}
+  .aj-btns{display:flex;gap:8px}
+  .ok-note{font-size:12.5px;color:var(--ingreso);font-weight:600;margin-top:8px}
+  .wipe-note{font-size:12.5px;color:var(--danger);font-weight:600;margin-top:8px}
 </style>
 </head>
 <body>
@@ -203,7 +229,7 @@
     <button class="q" onclick="openIngresos()"><span class="ic">€</span><span class="lb">Ingreso</span></button>
     <button class="q" onclick="openFijos()"><span class="ic">↻</span><span class="lb">Fijo</span></button>
     <button class="q" onclick="openExtras()"><span class="ic">+</span><span class="lb">Extra</span></button>
-    <button class="q" onclick="openSaldos()"><span class="ic">⚙</span><span class="lb">Saldos</span></button>
+    <button class="q" onclick="openAjustes()"><span class="ic">⚙</span><span class="lb">Ajustes</span></button>
   </div>
 
   <div class="paneles">
@@ -243,13 +269,7 @@
     <div class="pend-row" onclick="openPendDetail('unicaja')"><span class="bk"><i class="dt dt-uni"></i>UNICAJA</span><span class="pc-cnt" id="uniPendN"></span><b class="num" id="uniPend">—</b><span class="go">›</span></div>
     <div class="pend-row" onclick="openPendDetail('efectivo')"><span class="bk"><i class="dt dt-efe"></i>EFECTIVO</span><span class="pc-cnt" id="efePendN"></span><b class="num" id="efePend">—</b><span class="go">›</span></div>
   </div>
-  <div class="futuro-line hidden" id="heroFuturo"></div>
-
-  <div class="footer">
-    <div id="backupSlot"></div>
-    <button class="link" onclick="openBackup()">Copia de seguridad</button> ·
-    <button class="link" id="wipeBtn" onclick="borrarTodo()">Borrar todos los datos</button>
-  </div>
+  <div class="futuro-line hidden" id="heroFuturo" onclick="openFuturoDetail()"></div>
 
 <script>
 const KEY='gastos:data';
@@ -258,7 +278,7 @@ const store=(typeof window!=='undefined'&&window.storage)?window.storage:{
   get:async k=>{const v=localStorage.getItem(k);if(v===null)throw new Error('sin datos');return{key:k,value:v};},
   set:async(k,v)=>{localStorage.setItem(k,v);return{key:k,value:v};}
 };
-const CATS=['Vivienda','Suministros','Vehículo','Seguros','Autónomo / SS','Telefonía','Suscripciones','Alimentación','Ocio','Viajes','Regalos','Salud','Educación','Otros'];
+const CATS=['Vivienda','Suministros','Vehículo','Seguros','Autónomo / SS','Telefonía','Suscripciones','Alimentación','Ocio','El Mirador','Viajes','Regalos','Salud','Educación','Otros'];
 const FREQS=[['mensual','al mes',1],['trimestral','al trimestre',3],['anual','al año',12]];
 
 // Semilla con los gastos reales de Juan. Los ids fijos evitan duplicados al reabrir.
@@ -390,7 +410,8 @@ function fillFijos(){
 }
 
 /* Extras: navegador de mes + lista + añadir */
-function openExtras(){currentModal='extras';openModal('Gastos puntuales',
+let exCat='__all';
+function openExtras(){currentModal='extras';exCat='__all';openModal('Gastos puntuales',
   `<div class="ex-head" style="margin:2px 0 12px">
      <div class="sh-l"><h2 style="font-size:15px">Puntuales</h2><span class="cnt" id="exCnt"></span></div>
      <span class="pn-ctrl">
@@ -398,25 +419,35 @@ function openExtras(){currentModal='extras';openModal('Gastos puntuales',
        <b class="mes-lbl" id="exMesLbl">este mes</b>
        <button class="pn-btn" onclick="exShift(1)" aria-label="Mes siguiente">›</button>
      </span>
-   </div>`+shell('ex','+ Apuntar gasto extra','extra'));
+   </div>
+   <select class="cat-filter" id="exFilter" onchange="exCat=this.value;fillExtras()">
+     <option value="__all">Todas las categorías</option>
+     ${CATS.map(c=>`<option value="${c}">${c}</option>`).join('')}
+   </select>`+shell('ex','+ Apuntar gasto extra','extra'));
   fillExtras();
 }
 function fillExtras(){
   const now=new Date(),y=now.getFullYear(),m=now.getMonth();
+  const todayStr=isoD(now);
   const exTgt=new Date(y,m+exOffset,1),exY=exTgt.getFullYear(),exM=exTgt.getMonth();
-  const exVis=data.extras.filter(e=>{const x=new Date(e.date);return x.getFullYear()===exY&&x.getMonth()===exM;});
+  let exVis=data.extras.filter(e=>{const x=new Date(e.date);return x.getFullYear()===exY&&x.getMonth()===exM;});
+  if(exCat!=='__all')exVis=exVis.filter(e=>(e.category||'Otros')===exCat);
   const exSum=exVis.reduce((s,e)=>s+(Number(e.amount)||0),0);
   const lbl=document.getElementById('exMesLbl');if(lbl)lbl.textContent=mesLbl(exOffset,now);
   const cnt=document.getElementById('exCnt');if(cnt)cnt.textContent=exVis.length?exVis.length+' · '+eur(exSum):'';
   const L=document.getElementById('mList');if(!L)return;
-  if(!exVis.length){L.innerHTML='<div class="empty"><b>Sin gastos extra en '+(exOffset===0?'este mes':mesLbl(exOffset,now))+'</b>Usa las flechas para ver otros meses, o apunta aquí un gasto puntual.</div>';return;}
+  if(!exVis.length){
+    const donde=exCat==='__all'?(exOffset===0?'este mes':mesLbl(exOffset,now)):('«'+exCat+'» '+(exOffset===0?'este mes':'en '+mesLbl(exOffset,now)));
+    L.innerHTML='<div class="empty"><b>Sin gastos extra en '+donde+'</b>'+(exCat==='__all'?'Usa las flechas para ver otros meses, o apunta aquí un gasto puntual.':'Prueba otra categoría o cambia de mes.')+'</div>';return;
+  }
   L.innerHTML='<div class="list"></div>';
   const box=L.querySelector('.list');
   [...exVis].sort((a,b)=>new Date(a.date)-new Date(b.date)).forEach(e=>{
-    const el=document.createElement('div');el.className='item';
+    const pagado=e.date<=todayStr;
+    const el=document.createElement('div');el.className='item '+(pagado?'pagado':'porpagar');
     el.innerHTML=`<div class="body"><div class="name">${esc(e.name)}</div>
       <div class="meta"><span class="chip ex">${esc(e.category||'Otros')}</span>${payChip(e.pay)}<span class="freq">${fmtDate(e.date)}${e.note?' · '+esc(e.note):''}</span></div></div>
-      <div class="amt num gasto">${eur(e.amount)}</div>
+      <div class="amt num gasto">${eur(e.amount)}<small class="st ${pagado?'stc':'stp'}">${pagado?'pagado':'pendiente'}</small></div>
       <div class="row-actions"><button class="icon-btn" onclick="edit('extra','${e.id}')" aria-label="Editar">✎</button>${delBtn('extra',e.id)}</div>`;
     box.appendChild(el);
   });
@@ -449,7 +480,8 @@ function openPendDetail(pay){
   if(!items.length){
     html+='<div class="empty"><b>Nada pendiente</b>No queda ningún cobro por salir de '+cajaLbl+' en '+cuando+'.</div>';
   }else{
-    html+=items.map(x=>`<div class="pd-row">
+    html+='<div class="pd-legend"><span><i style="background:#E4D8C4"></i>Fijo</span><span><i style="background:#EAD2BE"></i>Puntual</span></div>';
+    html+=items.map(x=>`<div class="pd-row box ${x.tipo==='Fijo'?'pd-fijo':'pd-extra'}">
         <div class="pd-day"><b>${x.dia}</b><small>día</small></div>
         <div class="pd-info"><div class="pd-name">${esc(x.concepto)}</div><div class="pd-cat">${esc(x.cat)} · ${x.tipo}</div></div>
         <div class="pd-amt">${eur(x.importe)}</div>
@@ -457,6 +489,35 @@ function openPendDetail(pay){
     html+='<div class="pd-total"><span>Total pendiente</span><b>'+eur(total)+'</b></div>';
   }
   openModal('Pendiente · '+cajaLbl,html);
+}
+/* Cambio 3: comprometido futuro agrupado por mes */
+function openFuturoDetail(){
+  const now=new Date(),y=now.getFullYear(),m=now.getMonth();
+  const finMes=isoD(new Date(y,m+1,0));
+  const futuros=data.extras.filter(e=>e.date>finMes);
+  const total=futuros.reduce((s,e)=>s+(Number(e.amount)||0),0);
+  let html='<div class="m-sub">Gastos puntuales ya apuntados con fecha de meses siguientes. Aún no descuentan, pero conviene tenerlos presentes.</div>';
+  if(!futuros.length){
+    html+='<div class="empty"><b>Nada comprometido</b>No tienes gastos puntuales apuntados para meses futuros.</div>';
+    openModal('Comprometido a futuro',html);return;
+  }
+  const groups={};
+  futuros.forEach(e=>{const d=new Date(e.date+'T00:00:00');const k=d.getFullYear()*12+d.getMonth();(groups[k]=groups[k]||[]).push(e);});
+  Object.keys(groups).map(Number).sort((a,b)=>a-b).forEach(k=>{
+    const arr=groups[k].sort((a,b)=>new Date(a.date)-new Date(b.date));
+    const suma=arr.reduce((s,e)=>s+(Number(e.amount)||0),0);
+    const d=new Date(Math.floor(k/12),k%12,1);
+    const titulo=d.toLocaleDateString('es-ES',{month:'long',year:'numeric'});
+    html+='<div class="fm-group"><div class="fm-head"><span>'+titulo+'</span><b>'+eur(suma)+'</b></div>';
+    html+=arr.map(e=>`<div class="pd-row box pd-extra">
+        <div class="pd-day"><b>${new Date(e.date+'T00:00:00').getDate()}</b><small>día</small></div>
+        <div class="pd-info"><div class="pd-name">${esc(e.name)}</div><div class="pd-cat">${esc(e.category||'Otros')} · ${payLabel(e.pay)}</div></div>
+        <div class="pd-amt">${eur(e.amount)}</div>
+      </div>`).join('');
+    html+='</div>';
+  });
+  html+='<div class="pd-total"><span>Total comprometido</span><b>'+eur(total)+'</b></div>';
+  openModal('Comprometido a futuro',html);
 }
 
 function render(){
@@ -550,7 +611,7 @@ function render(){
   const finMes=isoLocal(new Date(y,m+1,0));
   const futuro=data.extras.filter(e=>e.date>finMes).reduce((s,e)=>s+(Number(e.amount)||0),0);
   const hf=document.getElementById('heroFuturo');
-  if(futuro>0){hf.classList.remove('hidden');hf.textContent='Comprometido para pr\u00f3ximos meses: '+eur(futuro);}
+  if(futuro>0){hf.classList.remove('hidden');hf.innerHTML='<span>Comprometido para pr\u00f3ximos meses: '+eur(futuro)+'</span><span class="go">\u203a</span>';}
   else hf.classList.add('hidden');
 
 }
@@ -635,7 +696,6 @@ function closeForm(){
   editing=null;
   const slot=document.getElementById('mSlot');if(slot)slot.innerHTML='';
   const addBtn=document.getElementById('mAdd');if(addBtn)addBtn.classList.remove('hidden');
-  const bk=document.getElementById('backupSlot');if(bk)bk.innerHTML='';
 }
 function payChanged(){
   const p=document.getElementById('i_pay').value;
@@ -679,30 +739,58 @@ async function saveIngreso(){
   else{data.ingresos.push({id:uid(),...obj});}
   await save();closeForm();refreshModal();render();
 }
-function openSaldos(){
-  currentModal='saldos';
+function openAjustes(){
+  currentModal='ajustes';
   const s=data.saldos||{};
   const today=new Date().toISOString().slice(0,10);
-  openModal('Saldos iniciales',`<div class="form" style="margin-top:2px">
+  openModal('Ajustes',`<div class="form" style="margin-top:2px">
+    <div class="aj-h">Saldos iniciales</div>
     <div class="two">
       <div class="field"><label>ING (€)</label><input id="s_ing" type="number" inputmode="decimal" step="0.01" placeholder="0,00" value="${s.ing??''}"></div>
       <div class="field"><label>Unicaja (€)</label><input id="s_uni" type="number" inputmode="decimal" step="0.01" placeholder="0,00" value="${s.unicaja??''}"></div>
     </div>
     <div class="field"><label>Efectivo (€)</label><input id="s_cash" type="number" inputmode="decimal" step="0.01" placeholder="0,00" value="${s.efectivo??''}"></div>
     <div class="field"><label>Fecha del saldo</label><input id="s_desde" type="date" value="${s.desde||today}"></div>
-    <div class="tot-note">Pon lo que tienes hoy en el banco y en la cartera. A partir de esa fecha, la app suma ingresos y resta gastos para calcular el total. Lo apuntado con fecha futura no descuenta hasta que llegue el día.</div>
+    <div class="tot-note">Pon lo que tienes hoy en el banco y en la cartera. A partir de esa fecha, la app suma ingresos y resta gastos. Lo apuntado con fecha futura no descuenta hasta que llegue el día.</div>
     <div class="form-actions">
-      <button class="btn" onclick="closeModal()">Cancelar</button>
-      <button class="btn primary" onclick="saveSaldos()">Guardar</button>
+      <button class="btn" onclick="closeModal()">Cerrar</button>
+      <button class="btn primary" onclick="saveSaldos()">Guardar saldos</button>
     </div>
+
+    <div class="aj-sep"></div>
+    <div class="aj-h">Copia de seguridad</div>
+    <div class="aj-btns">
+      <button class="btn primary" onclick="hacerCopia()">Hacer copia</button>
+      <button class="btn" onclick="abrirRecuperar()">Recuperar copia</button>
+    </div>
+    <div id="bkSlot"></div>
+
+    <div class="aj-sep"></div>
+    <div class="aj-h">Zona peligrosa</div>
+    <button class="btn" id="wipeBtn" onclick="borrarTodo()" style="width:100%;color:var(--danger)">Borrar todos los datos</button>
   </div>`);
-  document.getElementById('s_ing').focus();
 }
 async function saveSaldos(){
   const i=parseFloat(val('s_ing')),u=parseFloat(val('s_uni')),c=parseFloat(val('s_cash'));
   if(isNaN(i)&&isNaN(u)&&isNaN(c)){formErr('Pon al menos uno de los saldos.');return;}
   data.saldos={ing:isNaN(i)?0:i,unicaja:isNaN(u)?0:u,efectivo:isNaN(c)?0:c,desde:val('s_desde')};
   await save();closeModal();render();
+}
+async function hacerCopia(){
+  const txt=JSON.stringify(data);
+  const slot=document.getElementById('bkSlot');if(!slot)return;
+  try{
+    await navigator.clipboard.writeText(txt);
+    slot.innerHTML='<div class="ok-note">Copiado ✓ &nbsp;Pégalo en tus notas o email para guardarlo.</div>';
+  }catch(e){
+    slot.innerHTML='<div class="field" style="margin-top:12px"><label>No pude copiar solo. Copia este texto a mano y guárdalo:</label><textarea id="bk" rows="5">'+esc(txt)+'</textarea></div>';
+    const ta=document.getElementById('bk');if(ta){ta.focus();ta.select();}
+  }
+}
+function abrirRecuperar(){
+  const slot=document.getElementById('bkSlot');if(!slot)return;
+  slot.innerHTML='<div class="field" style="margin-top:12px"><label>Pega aquí una copia guardada y pulsa Restaurar:</label><textarea id="bk" rows="5" placeholder="Pega el texto de tu copia…"></textarea></div><div class="aj-btns"><button class="btn primary" onclick="loadBackup()">Restaurar</button></div>';
+  const ta=document.getElementById('bk');if(ta)ta.focus();
 }
 function val(id){return document.getElementById(id).value.trim();}
 function formErr(msg){
@@ -741,38 +829,25 @@ async function del(type,id){
   await save();refreshModal();render();
 }
 async function borrarTodo(){
-  const btn=document.getElementById('wipeBtn');
+  const btn=document.getElementById('wipeBtn');if(!btn)return;
   if(pendingDel!=='wipe'){
     pendingDel='wipe';clearTimeout(pendingTimer);
     btn.textContent='¿Seguro? Toca otra vez para borrarlo todo';
-    pendingTimer=setTimeout(()=>{pendingDel=null;btn.textContent='Borrar todos los datos';},4000);
+    pendingTimer=setTimeout(()=>{pendingDel=null;const b=document.getElementById('wipeBtn');if(b)b.textContent='Borrar todos los datos';},4000);
     return;
   }
   pendingDel=null;clearTimeout(pendingTimer);
-  btn.textContent='Borrar todos los datos';
   data={recurrentes:[],extras:[],ingresos:[],caja:[],saldos:null};
-  await save();render();
-}
-function openBackup(){
-  closeForm();
-  const slot=document.getElementById('backupSlot');
-  slot.innerHTML=`<div class="form" style="text-align:left;margin-bottom:14px">
-    <h3>Copia de seguridad</h3>
-    <div class="field"><label>Tus datos en texto. Cópialo y guárdalo (notas, email…) para restaurarlo aquí o en otra copia de la app.</label>
-    <textarea id="bk" rows="6">${esc(JSON.stringify(data))}</textarea></div>
-    <div class="form-actions">
-      <button class="btn" onclick="closeForm()">Cerrar</button>
-      <button class="btn primary" onclick="loadBackup()">Restaurar lo pegado</button>
-    </div>
-  </div>`;
+  await save();closeModal();render();
 }
 async function loadBackup(){
+  const slot=document.getElementById('bkSlot');
   try{
     const d=JSON.parse(document.getElementById('bk').value);
     if(!d||typeof d!=='object'||Array.isArray(d))throw 0;
     data={recurrentes:d.recurrentes||[],extras:d.extras||[],ingresos:d.ingresos||[],caja:d.caja||[],saldos:d.saldos||null};
-    await save();closeForm();render();
-  }catch(e){formErr('Ese texto no es una copia válida.');}
+    await save();closeModal();render();
+  }catch(e){if(slot)slot.innerHTML='<div class="wipe-note">Ese texto no es una copia válida.</div>';}
 }
 
 if('serviceWorker' in navigator && location.protocol==='https:'){
