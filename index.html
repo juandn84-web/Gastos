@@ -76,10 +76,12 @@
 
   /* Pendiente: tarjeta moca */
   .pend-block{background:rgba(95,79,65,.96);border-radius:26px;padding:13px 18px 4px;margin-top:12px;box-shadow:var(--shadow)}
-  .pend-head{display:flex;align-items:center;justify-content:space-between;padding-bottom:10px}
-  .pend-head .pn-title{font-size:15px;font-weight:700;color:#F6F1E8}
-  .pend-head .mes-lbl{color:#E8DECF}
-  .pend-head .pn-btn{box-shadow:none}
+  .pend-head{display:flex;align-items:center;gap:8px;padding-bottom:10px}
+  .pend-head .pn-title{font-size:15px;font-weight:700;color:#F6F1E8;white-space:nowrap}
+  .pend-tot{font-size:16px;font-weight:600;color:#EFC7A9;white-space:nowrap}
+  .pend-head .pn-ctrl{margin-left:auto}
+  .pend-head .mes-lbl{color:#E8DECF;min-width:60px;font-size:11.5px}
+  .pend-head .pn-btn{box-shadow:none;width:26px;height:26px;font-size:14px}
   .pend-row{display:grid;grid-template-columns:106px 1fr auto;align-items:center;column-gap:10px;padding:9px 0;border-top:1px solid rgba(246,241,232,.16);font-size:13px;font-weight:600;color:#EFE5D6;cursor:pointer}
   .pend-row .pc-cnt{color:#BFB09C;font-weight:500;font-size:12px}
   .pend-row b{font-size:16px;text-align:right;color:#EFC7A9}
@@ -201,6 +203,8 @@
   .amt small.stp{color:var(--gasto)} .amt small.stc{color:var(--muted)}
   /* Filtro de categoría */
   .cat-filter{width:100%;font-family:inherit;font-size:13px;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:9px 12px;margin-bottom:10px;box-shadow:var(--shadow)}
+  .filters{display:flex;gap:8px;margin-bottom:10px}
+  .filters .cat-filter{margin-bottom:0;flex:1;min-width:0}
   /* Detalle comprometido por mes */
   .fm-group{margin-top:14px}
   .fm-group:first-child{margin-top:4px}
@@ -260,6 +264,7 @@
   <div class="pend-block">
     <div class="pend-head">
       <span class="pn-title">Pendiente de cobro</span>
+      <b class="pend-tot num" id="pendTotal">—</b>
       <span class="pn-ctrl">
         <button class="pn-btn" onclick="pendShift(-1)" aria-label="Mes anterior">‹</button>
         <b class="mes-lbl" id="pendMesLbl">este mes</b>
@@ -402,8 +407,9 @@ function fillFijos(){
   [...data.recurrentes].sort((a,b)=>((a.day||1)-(b.day||1))||monthEq(b)-monthEq(a)).forEach(r=>{
     const f=FREQS.find(x=>x[0]===r.freq)||FREQS[0];
     const el=document.createElement('div');el.className='item';
-    el.innerHTML=`<div class="body"><div class="name">${esc(r.name)}</div>
-      <div class="meta"><span class="chip">${esc(r.category||'Otros')}</span>${payChip(r.pay)}<span class="freq">día ${r.day||1} · ${eur(r.amount)} ${f[1]}</span></div></div>
+    el.innerHTML=`<div class="pd-day"><b>${r.day||1}</b><small>día</small></div>
+      <div class="body"><div class="name">${esc(r.name)}</div>
+      <div class="meta"><span class="chip">${esc(r.category||'Otros')}</span>${payChip(r.pay)}<span class="freq">${eur(r.amount)} ${f[1]}</span></div></div>
       <div class="amt num gasto">${eur(monthEq(r))}<small>/mes</small></div>
       <div class="row-actions"><button class="icon-btn" onclick="edit('fijo','${r.id}')" aria-label="Editar">✎</button>${delBtn('fijo',r.id)}</div>`;
     box.appendChild(el);
@@ -411,8 +417,8 @@ function fillFijos(){
 }
 
 /* Extras: navegador de mes + lista + añadir */
-let exCat='__all';
-function openExtras(){currentModal='extras';exCat='__all';openModal('Gastos puntuales',
+let exCat='__all',exPay='__all';
+function openExtras(){currentModal='extras';exCat='__all';exPay='__all';openModal('Gastos puntuales',
   `<div class="ex-head" style="margin:2px 0 12px">
      <div class="sh-l"><h2 style="font-size:15px">Puntuales</h2><span class="cnt" id="exCnt"></span></div>
      <span class="pn-ctrl">
@@ -421,10 +427,18 @@ function openExtras(){currentModal='extras';exCat='__all';openModal('Gastos punt
        <button class="pn-btn" onclick="exShift(1)" aria-label="Mes siguiente">›</button>
      </span>
    </div>
-   <select class="cat-filter" id="exFilter" onchange="exCat=this.value;fillExtras()">
-     <option value="__all">Todas las categorías</option>
-     ${CATS.map(c=>`<option value="${c}">${c}</option>`).join('')}
-   </select>`+shell('ex','+ Apuntar gasto extra','extra'));
+   <div class="filters">
+     <select class="cat-filter" id="exFilter" onchange="exCat=this.value;fillExtras()">
+       <option value="__all">Todas las categorías</option>
+       ${CATS.map(c=>`<option value="${c}">${c}</option>`).join('')}
+     </select>
+     <select class="cat-filter" id="exPayFilter" onchange="exPay=this.value;fillExtras()">
+       <option value="__all">Todas las cuentas</option>
+       <option value="ing">ING</option>
+       <option value="unicaja">Unicaja</option>
+       <option value="efectivo">Efectivo</option>
+     </select>
+   </div>`+shell('ex','+ Apuntar gasto extra','extra'));
   fillExtras();
 }
 function fillExtras(){
@@ -433,6 +447,7 @@ function fillExtras(){
   const exTgt=new Date(y,m+exOffset,1),exY=exTgt.getFullYear(),exM=exTgt.getMonth();
   let exVis=data.extras.filter(e=>{const x=new Date(e.date);return x.getFullYear()===exY&&x.getMonth()===exM;});
   if(exCat!=='__all')exVis=exVis.filter(e=>(e.category||'Otros')===exCat);
+  if(exPay!=='__all')exVis=exVis.filter(e=>(e.pay||'ing')===exPay);
   const exSum=exVis.reduce((s,e)=>s+(Number(e.amount)||0),0);
   const lbl=document.getElementById('exMesLbl');if(lbl)lbl.textContent=mesLbl(exOffset,now);
   const cnt=document.getElementById('exCnt');if(cnt)cnt.textContent=exVis.length?exVis.length+' · '+eur(exSum):'';
@@ -564,12 +579,15 @@ function render(){
     return {v:pf.reduce((s,r)=>s+monthEq(r),0)+pe.reduce((s,e)=>s+(Number(e.amount)||0),0),n:pf.length+pe.length};
   };
   document.getElementById('pendMesLbl').textContent=mesLbl(pendOffset,now);
+  let pTot=0;
   Object.keys(M).forEach(p=>{
     setBal(PRE[p]+'Bal',M[p].bal);
     const pd=pendDe(p);
+    pTot+=pd.v;
     document.getElementById(PRE[p]+'Pend').textContent=eur(pd.v);
     document.getElementById(PRE[p]+'PendN').textContent=pd.n+(pd.n===1?' gasto':' gastos');
   });
+  document.getElementById('pendTotal').textContent=eur(pTot);
 
   // Disponible acumulado: cada fijo se descuenta en su d\u00eda de cobro de cada mes
   if(data.saldos){
