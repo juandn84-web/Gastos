@@ -159,7 +159,7 @@
   /* Ventanas emergentes (hoja inferior) */
   .modal-bg{position:fixed;inset:0;z-index:50;background:rgba(58,50,42,.45);display:flex;align-items:flex-end;justify-content:center}
   .modal-bg.hidden{display:none}
-  .modal{background:var(--paper);width:100%;max-width:560px;max-height:92vh;overflow-y:auto;border-radius:30px 30px 0 0;padding:0 16px 28px;box-shadow:0 -8px 40px rgba(58,50,42,.22);animation:sheet .26s cubic-bezier(.22,1,.36,1)}
+  .modal{background:var(--paper);width:100%;max-width:560px;height:86vh;overflow-y:auto;border-radius:30px 30px 0 0;padding:0 16px 28px;box-shadow:0 -8px 40px rgba(58,50,42,.22);animation:sheet .26s cubic-bezier(.22,1,.36,1)}
   @keyframes sheet{from{transform:translateY(40px)}to{transform:translateY(0)}}
   .modal-grip{width:42px;height:5px;border-radius:3px;background:#D6CDBE;margin:10px auto 0}
   .modal-head{position:sticky;top:0;background:var(--paper);display:flex;align-items:center;justify-content:space-between;padding:12px 2px 12px;z-index:3}
@@ -189,15 +189,16 @@
   /* Detalle pendiente: fijo vs extra por fondo */
   .pd-row.box{border-top:0;border-radius:15px;margin-top:7px;padding:11px 12px}
   .pd-row.box:first-child{margin-top:0}
-  .pd-fijo{background:#F1EADD}
-  .pd-extra{background:#F4E6DA}
+  .pd-fijo{background:#E7E0D2;border-left:5px solid #A8987E}
+  .pd-extra{background:#EFD8C6;border-left:5px solid #BE855C}
   .pd-legend{display:flex;gap:16px;margin:0 2px 12px;font-size:11.5px;color:var(--muted)}
   .pd-legend i{display:inline-block;width:12px;height:12px;border-radius:4px;vertical-align:-2px;margin-right:5px}
   /* Puntuales: pagado vs por pagar */
-  .item.pagado{opacity:.66}
-  .item.porpagar{background:#F6EADF;border:1px solid #ECD8C7}
+  .item.pagado{background:#E6E0D4;border:1px solid #D8CEBD;border-left:5px solid #B3A78F}
+  .item.porpagar{background:#F2DDCB;border:1px solid #E3C4A9;border-left:5px solid #BE855C}
   .amt small.st{display:block;font-size:10px;font-weight:600;margin-top:2px}
-  .amt small.stp{color:var(--efeoro)} .amt small.stc{color:var(--faint)}
+  .item .pd-day{margin-right:2px}
+  .amt small.stp{color:var(--gasto)} .amt small.stc{color:var(--muted)}
   /* Filtro de categoría */
   .cat-filter{width:100%;font-family:inherit;font-size:13px;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:9px 12px;margin-bottom:10px;box-shadow:var(--shadow)}
   /* Detalle comprometido por mes */
@@ -444,9 +445,11 @@ function fillExtras(){
   const box=L.querySelector('.list');
   [...exVis].sort((a,b)=>new Date(a.date)-new Date(b.date)).forEach(e=>{
     const pagado=e.date<=todayStr;
+    const dia=new Date(e.date+'T00:00:00').getDate();
     const el=document.createElement('div');el.className='item '+(pagado?'pagado':'porpagar');
-    el.innerHTML=`<div class="body"><div class="name">${esc(e.name)}</div>
-      <div class="meta"><span class="chip ex">${esc(e.category||'Otros')}</span>${payChip(e.pay)}<span class="freq">${fmtDate(e.date)}${e.note?' · '+esc(e.note):''}</span></div></div>
+    el.innerHTML=`<div class="pd-day"><b>${dia}</b><small>día</small></div>
+      <div class="body"><div class="name">${esc(e.name)}</div>
+      <div class="meta"><span class="chip ex">${esc(e.category||'Otros')}</span>${payChip(e.pay)}${e.note?'<span class="freq">'+esc(e.note)+'</span>':''}</div></div>
       <div class="amt num gasto">${eur(e.amount)}<small class="st ${pagado?'stc':'stp'}">${pagado?'pagado':'pendiente'}</small></div>
       <div class="row-actions"><button class="icon-btn" onclick="edit('extra','${e.id}')" aria-label="Editar">✎</button>${delBtn('extra',e.id)}</div>`;
     box.appendChild(el);
@@ -480,7 +483,7 @@ function openPendDetail(pay){
   if(!items.length){
     html+='<div class="empty"><b>Nada pendiente</b>No queda ningún cobro por salir de '+cajaLbl+' en '+cuando+'.</div>';
   }else{
-    html+='<div class="pd-legend"><span><i style="background:#E4D8C4"></i>Fijo</span><span><i style="background:#EAD2BE"></i>Puntual</span></div>';
+    html+='<div class="pd-legend"><span><i style="background:#A8987E"></i>Fijo</span><span><i style="background:#BE855C"></i>Puntual</span></div>';
     html+=items.map(x=>`<div class="pd-row box ${x.tipo==='Fijo'?'pd-fijo':'pd-extra'}">
         <div class="pd-day"><b>${x.dia}</b><small>día</small></div>
         <div class="pd-info"><div class="pd-name">${esc(x.concepto)}</div><div class="pd-cat">${esc(x.cat)} · ${x.tipo}</div></div>
