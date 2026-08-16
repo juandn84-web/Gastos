@@ -192,7 +192,18 @@
   .pd-row.box{border-top:0;border-radius:15px;margin-top:7px;padding:11px 12px}
   .pd-row.box:first-child{margin-top:0}
   .pd-fijo{background:#E7E0D2;border-left:5px solid #A8987E}
+  .pd-anual{background:#EADBC0;border-left:5px solid #8A6D3B}
   .pd-extra{background:#EFD8C6;border-left:5px solid #BE855C}
+  .fj-tot{display:flex;gap:10px;margin:2px 0 12px}
+  .fj-tot>div{flex:1;background:var(--surface);border-radius:16px;padding:11px 14px;box-shadow:var(--shadow)}
+  .fj-tot b{display:block;font-size:19px;font-weight:600;color:var(--ink)}
+  .fj-tot small{font-size:11px;color:var(--muted)}
+  .fj-tot .clic{cursor:pointer}
+  .fj-tot .clic small{color:var(--efeoro);font-weight:600}
+  .chip.fq-mes{background:#E7E0D2;color:#7A6B52}
+  .chip.fq-ano{background:#E4D2AE;color:#7A5C22}
+  .item.fx-ano{border-left:5px solid #8A6D3B}
+  .item.fx-mes{border-left:5px solid #C9BEA8}
   .pd-legend{display:flex;gap:16px;margin:0 2px 12px;font-size:11.5px;color:var(--muted)}
   .pd-legend i{display:inline-block;width:12px;height:12px;border-radius:4px;vertical-align:-2px;margin-right:5px}
   /* Puntuales: pagado vs por pagar */
@@ -205,6 +216,13 @@
   .cat-filter{width:100%;font-family:inherit;font-size:13px;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:9px 12px;margin-bottom:10px;box-shadow:var(--shadow)}
   .filters{display:flex;gap:8px;margin-bottom:10px}
   .filters .cat-filter{margin-bottom:0;flex:1;min-width:0}
+  .pmov{display:flex;gap:10px;align-items:flex-start;padding:11px 0;border-top:1px solid var(--line)}
+  .pmov input[type=checkbox]{width:20px;height:20px;margin-top:8px;flex:0 0 auto;accent-color:var(--moca)}
+  .pmov-body{flex:1;min-width:0;display:flex;flex-direction:column;gap:6px}
+  .pmov-body input,.pmov-body select{width:100%;font-family:inherit;font-size:14px;color:var(--ink);background:#F4EFE7;border:1px solid var(--line);border-radius:12px;padding:9px 10px;outline:none}
+  .pmov-row{display:flex;gap:6px}
+  .pmov-row select{flex:1;min-width:0}
+  .pmov-row input{width:104px;flex:0 0 auto}
   /* Detalle comprometido por mes */
   .fm-group{margin-top:14px}
   .fm-group:first-child{margin-top:4px}
@@ -285,7 +303,12 @@ const store=(typeof window!=='undefined'&&window.storage)?window.storage:{
   set:async(k,v)=>{localStorage.setItem(k,v);return{key:k,value:v};}
 };
 const CATS=['Vivienda','Suministros','Vehículo','Seguros','Autónomo / SS','Telefonía','Suscripciones','Alimentación','Ocio','El Mirador','Viajes','Regalos','Salud','Educación','Otros'];
-const FREQS=[['mensual','al mes',1],['trimestral','al trimestre',3],['anual','al año',12]];
+const FREQS=[['mensual','al mes',1],['anual','al año',12]];
+const MESES=['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+const isAnual=r=>r.freq==='anual';
+const chMonth=r=>((Number(r.month)||1)-1);        // mes de cobro (0-11) del anual
+const chargesIn=(r,mi)=>isAnual(r)?chMonth(r)===mi:true;  // ¿se cobra en el mes mi?
+const chargeAmt=r=>Number(r.amount)||0;           // importe completo cuando se cobra
 
 // Semilla con los gastos reales de Juan. Los ids fijos evitan duplicados al reabrir.
 const SEED={recurrentes:[
@@ -397,23 +420,60 @@ function fillIngresos(){
 }
 
 /* Fijos: lista + añadir (doble función) */
-function openFijos(){currentModal='fijos';openModal('Gastos fijos',shell('','+ Añadir gasto fijo','fijo'));fillFijos();}
+let fijoFilter='todos';
+function openFijos(){currentModal='fijos';fijoFilter='todos';openModal('Gastos fijos',
+  `<div id="fjHead"></div>`+shell('','+ Añadir gasto fijo','fijo'));
+  fillFijos();
+}
 function fillFijos(){
-  const fijoMes=data.recurrentes.reduce((s,r)=>s+monthEq(r),0);
   const L=document.getElementById('mList');if(!L)return;
+  const head=document.getElementById('fjHead');
+  const men=data.recurrentes.filter(r=>!isAnual(r));
+  const anu=data.recurrentes.filter(r=>isAnual(r));
+  const totMen=men.reduce((s,r)=>s+chargeAmt(r),0);
+  const totAnu=anu.reduce((s,r)=>s+chargeAmt(r),0);
+  if(head){
+    head.innerHTML=data.recurrentes.length?
+      `<div class="fj-tot"><div><b>${eur(totMen)}</b><small>mensuales / mes</small></div><div class="clic" onclick="openAnuales()"><b>${eur(totAnu)}</b><small>anuales / año ›</small></div></div>
+       <select class="cat-filter" id="fjFilter" onchange="fijoFilter=this.value;fillFijos()">
+         <option value="todos"${fijoFilter==='todos'?' selected':''}>Todos</option>
+         <option value="mensual"${fijoFilter==='mensual'?' selected':''}>Solo mensuales</option>
+         <option value="anual"${fijoFilter==='anual'?' selected':''}>Solo anuales</option>
+       </select>`:'';
+  }
   if(!data.recurrentes.length){L.innerHTML='<div class="empty"><b>Aún no hay gastos fijos</b>Añade hipoteca o alquiler, suministros, seguros, la cuota de autónomo, suscripciones…</div>';return;}
-  L.innerHTML='<div class="m-sub">'+data.recurrentes.length+' · '+eur(fijoMes)+'/mes</div><div class="list"></div>';
+  let lista=fijoFilter==='mensual'?men:fijoFilter==='anual'?anu:data.recurrentes;
+  lista=[...lista].sort((a,b)=>(isAnual(a)-isAnual(b))||((a.day||1)-(b.day||1)));
+  if(!lista.length){L.innerHTML='<div class="empty"><b>Nada aquí</b>No hay fijos de ese tipo.</div>';return;}
+  L.innerHTML='<div class="list"></div>';
   const box=L.querySelector('.list');
-  [...data.recurrentes].sort((a,b)=>((a.day||1)-(b.day||1))||monthEq(b)-monthEq(a)).forEach(r=>{
-    const f=FREQS.find(x=>x[0]===r.freq)||FREQS[0];
-    const el=document.createElement('div');el.className='item';
+  lista.forEach(r=>{
+    const an=isAnual(r);
+    const el=document.createElement('div');el.className='item '+(an?'fx-ano':'fx-mes');
+    const cuando=an?('cada '+MESES[chMonth(r)]):'cada mes';
     el.innerHTML=`<div class="pd-day"><b>${r.day||1}</b><small>día</small></div>
       <div class="body"><div class="name">${esc(r.name)}</div>
-      <div class="meta"><span class="chip">${esc(r.category||'Otros')}</span>${payChip(r.pay)}<span class="freq">${eur(r.amount)} ${f[1]}</span></div></div>
-      <div class="amt num gasto">${eur(monthEq(r))}<small>/mes</small></div>
+      <div class="meta"><span class="chip">${esc(r.category||'Otros')}</span>${payChip(r.pay)}<span class="chip ${an?'fq-ano':'fq-mes'}">${an?'Anual':'Mensual'}</span></div></div>
+      <div class="amt num gasto">${eur(r.amount)}<small>${cuando}</small></div>
       <div class="row-actions"><button class="icon-btn" onclick="edit('fijo','${r.id}')" aria-label="Editar">✎</button>${delBtn('fijo',r.id)}</div>`;
     box.appendChild(el);
   });
+}
+function openAnuales(){
+  const anu=[...data.recurrentes.filter(isAnual)].sort((a,b)=>(chMonth(a)-chMonth(b))||((a.day||1)-(b.day||1)));
+  const tot=anu.reduce((s,r)=>s+chargeAmt(r),0);
+  let html='<div class="m-sub">Todos tus gastos que se cobran una vez al año, ordenados por mes.</div>';
+  if(!anu.length){
+    html+='<div class="empty"><b>Sin gastos anuales</b>Cuando marques un gasto fijo como «anual» aparecerá aquí con su mes de cobro.</div>';
+    openModal('Gastos anuales',html);return;
+  }
+  html+=anu.map(r=>`<div class="pd-row box pd-anual">
+      <div class="pd-day"><b>${r.day||1}</b><small>${MESES[chMonth(r)].slice(0,3)}</small></div>
+      <div class="pd-info"><div class="pd-name">${esc(r.name)}</div><div class="pd-cat">${esc(r.category||'Otros')} · ${payLabel(r.pay)} · ${MESES[chMonth(r)]}</div></div>
+      <div class="pd-amt">${eur(r.amount)}</div>
+    </div>`).join('');
+  html+='<div class="pd-total"><span>Total al año</span><b>'+eur(tot)+'</b></div>';
+  openModal('Gastos anuales',html);
 }
 
 /* Extras: navegador de mes + lista + añadir */
@@ -438,7 +498,7 @@ function openExtras(){currentModal='extras';exCat='__all';exPay='__all';openModa
        <option value="unicaja">Unicaja</option>
        <option value="efectivo">Efectivo</option>
      </select>
-   </div>`+shell('ex','+ Apuntar gasto extra','extra'));
+   </div>`+shell('ex','+ Apuntar gasto extra','extra')+'<button class="add" id="mPaste" onclick="openPaste()" style="margin-top:8px">📋 Pegar movimientos del banco</button>');
   fillExtras();
 }
 function fillExtras(){
@@ -479,9 +539,9 @@ function pendItems(pay){
   const eom=new Date(ty,tm+1,0).getDate();
   const inTgt=d=>{const x=new Date(d);return x.getFullYear()===ty&&x.getMonth()===tm;};
   const items=[];
-  data.recurrentes.filter(r=>(r.pay||'ing')===pay).forEach(r=>{
+  data.recurrentes.filter(r=>(r.pay||'ing')===pay&&chargesIn(r,tm)).forEach(r=>{
     const dia=Math.min(Number(r.day)||1,eom);
-    if(pendOffset===0?dia>hoyDia:true)items.push({dia,concepto:r.name,cat:r.category||'Otros',importe:monthEq(r),tipo:'Fijo'});
+    if(pendOffset===0?dia>hoyDia:true)items.push({dia,concepto:r.name,cat:r.category||'Otros',importe:chargeAmt(r),tipo:isAnual(r)?'Anual':'Fijo'});
   });
   data.extras.filter(e=>(e.pay||'ing')===pay&&inTgt(e.date)).forEach(e=>{
     if(pendOffset===0?e.date>todayStr:true){const dia=new Date(e.date+'T00:00:00').getDate();items.push({dia,concepto:e.name,cat:e.category||'Otros',importe:Number(e.amount)||0,tipo:'Extra'});}
@@ -498,8 +558,8 @@ function openPendDetail(pay){
   if(!items.length){
     html+='<div class="empty"><b>Nada pendiente</b>No queda ningún cobro por salir de '+cajaLbl+' en '+cuando+'.</div>';
   }else{
-    html+='<div class="pd-legend"><span><i style="background:#A8987E"></i>Fijo</span><span><i style="background:#BE855C"></i>Puntual</span></div>';
-    html+=items.map(x=>`<div class="pd-row box ${x.tipo==='Fijo'?'pd-fijo':'pd-extra'}">
+    html+='<div class="pd-legend"><span><i style="background:#A8987E"></i>Fijo mensual</span><span><i style="background:#8A6D3B"></i>Fijo anual</span><span><i style="background:#BE855C"></i>Puntual</span></div>';
+    html+=items.map(x=>`<div class="pd-row box ${x.tipo==='Anual'?'pd-anual':x.tipo==='Fijo'?'pd-fijo':'pd-extra'}">
         <div class="pd-day"><b>${x.dia}</b><small>día</small></div>
         <div class="pd-info"><div class="pd-name">${esc(x.concepto)}</div><div class="pd-cat">${esc(x.cat)} · ${x.tipo}</div></div>
         <div class="pd-amt">${eur(x.importe)}</div>
@@ -553,11 +613,12 @@ function render(){
     const fijos=data.recurrentes.filter(r=>(r.pay||'ing')===p);
     const exs=data.extras.filter(e=>(e.pay||'ing')===p&&inMonth(e.date));
     const ing=data.ingresos.filter(i=>(i.pay||'ing')===p&&inMonth(i.date)).reduce((s,i)=>s+netoOf(i),0);
-    const fijoMes=fijos.reduce((s,r)=>s+monthEq(r),0);
+    const fijosMes=fijos.filter(r=>chargesIn(r,m));
+    const fijoMes=fijosMes.reduce((s,r)=>s+chargeAmt(r),0);
     const exMes=exs.reduce((s,e)=>s+(Number(e.amount)||0),0);
-    const pendF=fijos.filter(r=>diaDe(r)>hoyDia);
+    const pendF=fijosMes.filter(r=>diaDe(r)>hoyDia);
     const pendE=exs.filter(e=>e.date>todayStr);
-    const pend=pendF.reduce((s,r)=>s+monthEq(r),0)+pendE.reduce((s,e)=>s+(Number(e.amount)||0),0);
+    const pend=pendF.reduce((s,r)=>s+chargeAmt(r),0)+pendE.reduce((s,e)=>s+(Number(e.amount)||0),0);
     return {ing,fijoMes,exMes,pend,pendN:pendF.length+pendE.length,bal:ing-fijoMes-exMes};
   };
   const M={ing:calc('ing'),unicaja:calc('unicaja'),efectivo:calc('efectivo')};
@@ -572,11 +633,11 @@ function render(){
   const ty=tgt.getFullYear(),tm=tgt.getMonth();
   const inTgt=d=>{const x=new Date(d);return x.getFullYear()===ty&&x.getMonth()===tm;};
   const pendDe=p=>{
-    const fijos=data.recurrentes.filter(r=>(r.pay||'ing')===p);
+    const fijos=data.recurrentes.filter(r=>(r.pay||'ing')===p&&chargesIn(r,tm));
     const exs=data.extras.filter(e=>(e.pay||'ing')===p&&inTgt(e.date));
     const pf=pendOffset===0?fijos.filter(r=>diaDe(r)>hoyDia):fijos;
     const pe=pendOffset===0?exs.filter(e=>e.date>todayStr):exs;
-    return {v:pf.reduce((s,r)=>s+monthEq(r),0)+pe.reduce((s,e)=>s+(Number(e.amount)||0),0),n:pf.length+pe.length};
+    return {v:pf.reduce((s,r)=>s+chargeAmt(r),0)+pe.reduce((s,e)=>s+(Number(e.amount)||0),0),n:pf.length+pe.length};
   };
   document.getElementById('pendMesLbl').textContent=mesLbl(pendOffset,now);
   let pTot=0;
@@ -599,9 +660,11 @@ function render(){
         const d0=new Date(desde+'T00:00:00');
         let mm=new Date(d0.getFullYear(),d0.getMonth(),1);
         while(mm<=now){
-          const eom=new Date(mm.getFullYear(),mm.getMonth()+1,0).getDate();
-          const fs=isoLocal(new Date(mm.getFullYear(),mm.getMonth(),Math.min(Number(r.day)||1,eom)));
-          if(fs>=desde&&fs<=todayStr)s+=monthEq(r);
+          if(chargesIn(r,mm.getMonth())){
+            const eom=new Date(mm.getFullYear(),mm.getMonth()+1,0).getDate();
+            const fs=isoLocal(new Date(mm.getFullYear(),mm.getMonth(),Math.min(Number(r.day)||1,eom)));
+            if(fs>=desde&&fs<=todayStr)s+=chargeAmt(r);
+          }
           mm=new Date(mm.getFullYear(),mm.getMonth()+1,1);
         }
       });
@@ -648,6 +711,7 @@ function openForm(type,item){
   editing=item?{type,id:item.id}:null;
   const slot=document.getElementById('mSlot');
   const addBtn=document.getElementById('mAdd');if(addBtn)addBtn.classList.add('hidden');
+  const pasteBtn=document.getElementById('mPaste');if(pasteBtn)pasteBtn.classList.add('hidden');
   const today=isoD(new Date());
   const nw=new Date();
   const exDef=exOffset===0?today:isoD(new Date(nw.getFullYear(),nw.getMonth()+exOffset,1));
@@ -675,17 +739,19 @@ function openForm(type,item){
     return;
   }
   if(type==='fijo'){
+    const fm=item&&item.month?item.month:(new Date().getMonth()+1);
     slot.innerHTML=`<div class="form">
       <h3>${item?'Editar gasto fijo':'Nuevo gasto fijo'}</h3>
       <div class="field"><label>Concepto</label><input id="f_name" placeholder="Ej. Hipoteca, Movistar, Cuota autónomo" value="${item?esc(item.name):''}"></div>
       <div class="two">
         <div class="field"><label>Importe (€)</label><input id="f_amount" type="number" inputmode="decimal" step="0.01" placeholder="0,00" value="${item?item.amount:''}"></div>
-        <div class="field"><label>Frecuencia</label><select id="f_freq">${FREQS.map(f=>`<option value="${f[0]}" ${item&&item.freq===f[0]?'selected':''}>${f[0][0].toUpperCase()+f[0].slice(1)}</option>`).join('')}</select></div>
+        <div class="field"><label>Frecuencia</label><select id="f_freq" onchange="fijoFreqChanged()">${FREQS.map(f=>`<option value="${f[0]}" ${item&&item.freq===f[0]?'selected':''}>${f[0][0].toUpperCase()+f[0].slice(1)}</option>`).join('')}</select></div>
       </div>
       <div class="two">
         <div class="field"><label>Día de cobro (1-31)</label><input id="f_day" type="number" inputmode="numeric" min="1" max="31" value="${item?(item.day||1):1}"></div>
-        <div class="field"><label>Categoría</label><select id="f_cat">${catOptions(item?item.category:'Vivienda')}</select></div>
+        <div class="field" id="f_month_wrap" style="display:${item&&item.freq==='anual'?'block':'none'}"><label>Mes de cobro</label><select id="f_month">${MESES.map((mn,i)=>`<option value="${i+1}" ${fm===i+1?'selected':''}>${mn[0].toUpperCase()+mn.slice(1)}</option>`).join('')}</select></div>
       </div>
+      <div class="field"><label>Categoría</label><select id="f_cat">${catOptions(item?item.category:'Vivienda')}</select></div>
       <div class="field"><label>Se paga en</label><select id="f_pay">${payOptions(item?item.pay:'ing')}</select></div>
       <div class="form-actions">
         <button class="btn" onclick="closeForm()">Cancelar</button>
@@ -717,6 +783,137 @@ function closeForm(){
   editing=null;
   const slot=document.getElementById('mSlot');if(slot)slot.innerHTML='';
   const addBtn=document.getElementById('mAdd');if(addBtn)addBtn.classList.remove('hidden');
+  const pasteBtn=document.getElementById('mPaste');if(pasteBtn)pasteBtn.classList.remove('hidden');
+}
+/* ---------- Pegar movimientos del banco ---------- */
+let pasted=[];
+function tISO(d){const p=d.split('/');return p[2]+'-'+p[1]+'-'+p[0];}
+function titleCase(s){return s.toLowerCase().replace(/\s+/g,' ').trim().replace(/\b([a-záéíóúñ])/g,c=>c.toUpperCase());}
+function cleanTail(s){return s.replace(/\.{2,}/g,'').replace(/\s{2,}/g,' ').trim().replace(/\s+(es|es\.?)$/i,'').trim();}
+function guessCat(low){
+  if(/el mirador|p[áa]del/.test(low))return 'El Mirador';
+  if(/cafeter|restaurant|\bbar\b|helader|cervec|tapas|pizzer|burger|kebab/.test(low))return 'Ocio';
+  if(/bizum/.test(low))return 'Otros';
+  if(/gasolin|combustible|carburante|repsol|cepsa|galp|\bbp\b|shell|petro/.test(low))return 'Vehículo';
+  if(/supermercad|mercadona|carrefour|lidl|aldi|\bdia\b|consum|alcampo|hipercor|eroski/.test(low))return 'Alimentación';
+  if(/farmacia|cl[íi]nica|hospital|m[ée]dic|dental|dentista/.test(low))return 'Salud';
+  if(/iberia|vueling|ryanair|renfe|hotel|booking|airbnb|billete/.test(low))return 'Viajes';
+  return 'Otros';
+}
+// Parser de importe que entiende 1,084.02 (US) y 1.084,02 € (EU)
+function parseAmt(raw){
+  const neg=/-/.test(raw);
+  let s=raw.replace(/[^\d.,]/g,'');
+  if(!/\d/.test(s))return null;
+  const lc=s.lastIndexOf(','),ld=s.lastIndexOf('.');
+  if(lc>ld)s=s.replace(/\./g,'').replace(',','.');
+  else if(ld>lc)s=s.replace(/,/g,'');
+  else s=s.replace(/[.,]/g,'');
+  const v=parseFloat(s);if(isNaN(v))return null;
+  return neg?-v:v;
+}
+function makeMov(desc,amount,date){
+  desc=desc.replace(/\s+/g,' ').trim();
+  const low=desc.toLowerCase();
+  const cat=guessCat(low);
+  let name='',m;
+  if(/bizum/.test(low)){
+    m=desc.match(/bizum\s+(?:enviado|recibido)\s+a\s+(.+)$/i);
+    let who=(m?m[1]:'').replace(/\b(sin\s+concepto|gasto\s+bizum|concepto)\b.*$/i,'').replace(/\.{2,}/g,'').trim();
+    name=who?('Bizum a '+titleCase(who)):'Bizum';
+  }else if((m=desc.match(/pago en\s+(.+)$/i))){
+    let who=m[1].replace(/\bcafeter[íi]as?\s+y\s+restaurantes\b.*$/i,'').replace(/\bsin\s+concepto\b.*$/i,'');
+    name=titleCase(cleanTail(who))||'Pago';
+  }else{
+    let d=desc.replace(/cafeter[íi]as?\s+[yуi]\s+restaurantes/ig,'').replace(/otros gastos|ocio y viajes|gasto bizum|sin concepto|compras|transferencia/ig,'').trim();
+    name=titleCase(cleanTail(d))||'Gasto';
+  }
+  return {date:date||null,name,cat,amount:Math.abs(amount)};
+}
+// Formato tabla (copiado de la web): fecha … -importe saldo, todo en una línea
+function parseTabular(text){
+  const t=text.replace(/[\r\n]+/g,' ').replace(/\s{2,}/g,' ').trim();
+  const re=/(\d{2}\/\d{2}\/\d{4})\s+(.+?)\s+(-?\d[\d.,]*)\s+(\d[\d.,]*)(?=\s+\d{2}\/\d{2}\/\d{4}|\s*$)/g;
+  const out=[];let m;
+  while((m=re.exec(t))){
+    const amt=parseAmt(m[3]);
+    if(amt==null||amt>=0)continue;
+    out.push(makeMov(m[2],amt,tISO(m[1])));
+  }
+  return out;
+}
+// Formato vertical (copiado de la app): cada campo en su línea, sin fecha
+function parseVertical(text){
+  const lines=text.split(/[\r\n]+/).map(s=>s.trim()).filter(Boolean);
+  const isAmt=s=>/^-?\s*[\d.,]+\s*€?$/.test(s)&&/\d/.test(s);
+  const out=[];let buf=[];
+  for(const ln of lines){
+    if(isAmt(ln)){
+      const v=parseAmt(ln);
+      if(v!=null&&v<0){out.push(makeMov(buf.join(' '),v,null));buf=[];}
+      else buf=[];               // saldo o positivo → descartar buffer
+    }else buf.push(ln);
+  }
+  return out;
+}
+function parseMovs(text){
+  const tab=parseTabular(text);
+  return tab.length?tab:parseVertical(text);
+}
+function openPaste(){
+  const slot=document.getElementById('mSlot');if(!slot)return;
+  const a=document.getElementById('mAdd');if(a)a.classList.add('hidden');
+  const p=document.getElementById('mPaste');if(p)p.classList.add('hidden');
+  slot.innerHTML=`<div class="form">
+    <h3>Pegar movimientos del banco</h3>
+    <div class="two">
+      <div class="field"><label>Cuenta</label><select id="p_pay">${payOptions('ing')}</select></div>
+      <div class="field"><label>Fecha (si no la trae)</label><input id="p_date" type="date" value="${isoD(new Date())}"></div>
+    </div>
+    <div class="field"><label>Pega el texto copiado (de la web o de la app)</label><textarea id="p_text" rows="6" placeholder="Pega aquí…"></textarea></div>
+    <div class="form-actions">
+      <button class="btn" onclick="closeForm()">Cancelar</button>
+      <button class="btn primary" onclick="detectPaste()">Detectar</button>
+    </div>
+    <div id="pasteResult"></div>
+  </div>`;
+  document.getElementById('p_text').focus();
+}
+function detectPaste(){
+  pasted=parseMovs(document.getElementById('p_text').value);
+  const batch=document.getElementById('p_date').value;
+  pasted.forEach(r=>{if(!r.date)r.date=batch;});
+  const box=document.getElementById('pasteResult');
+  if(!pasted.length){box.innerHTML='<div class="wipe-note">No detecté movimientos. Asegúrate de copiar el texto con sus importes (por ejemplo −15,50 €).</div>';return;}
+  const tot=pasted.reduce((s,r)=>s+r.amount,0);
+  let h='<div class="m-sub" style="margin-top:14px">'+pasted.length+' gastos detectados · '+eur(tot)+'. Revisa, desmarca los que no quieras y confirma.</div>';
+  h+=pasted.map((r,i)=>`<div class="pmov">
+     <input type="checkbox" id="p_chk_${i}" checked>
+     <div class="pmov-body">
+       <input id="p_name_${i}" value="${esc(r.name)}">
+       <div class="pmov-row">
+         <select id="p_cat_${i}">${CATS.map(c=>`<option ${c===r.cat?'selected':''}>${c}</option>`).join('')}</select>
+         <input id="p_amt_${i}" type="number" step="0.01" value="${r.amount}">
+       </div>
+       <input id="p_date_${i}" type="date" value="${r.date}">
+     </div>
+   </div>`).join('');
+  h+=`<button class="add ex" style="margin-top:14px" onclick="savePasted()">Guardar seleccionados</button>`;
+  box.innerHTML=h;
+}
+async function savePasted(){
+  let n=0;
+  pasted.forEach((r,i)=>{
+    const chk=document.getElementById('p_chk_'+i);
+    if(!chk||!chk.checked)return;
+    const name=(document.getElementById('p_name_'+i).value||'').trim();
+    const amt=parseFloat(document.getElementById('p_amt_'+i).value);
+    if(!name||isNaN(amt)||amt<=0)return;
+    data.extras.push({id:uid(),name,amount:amt,date:document.getElementById('p_date_'+i).value,category:document.getElementById('p_cat_'+i).value,note:'',pay:document.getElementById('p_pay').value});
+    n++;
+  });
+  if(!n){formErr('No hay nada marcado para guardar.');return;}
+  pasted=[];await save();closeForm();refreshModal();render();
 }
 function payChanged(){
   const p=document.getElementById('i_pay').value;
@@ -737,10 +934,15 @@ async function saveFijo(){
   const name=val('f_name'),amount=parseFloat(val('f_amount'));
   if(!name||isNaN(amount)){formErr('Pon al menos un concepto y un importe.');return;}
   const day=Math.min(31,Math.max(1,parseInt(val('f_day'))||1));
-  const obj={name,amount,freq:val('f_freq'),category:val('f_cat'),pay:val('f_pay'),day};
+  const freq=val('f_freq');
+  const obj={name,amount,freq,category:val('f_cat'),pay:val('f_pay'),day,month:freq==='anual'?(parseInt(val('f_month'))||1):null};
   if(editing){const r=data.recurrentes.find(x=>x.id===editing.id);Object.assign(r,obj);}
   else{data.recurrentes.push({id:uid(),...obj});}
   await save();closeForm();refreshModal();render();
+}
+function fijoFreqChanged(){
+  const w=document.getElementById('f_month_wrap');
+  if(w)w.style.display=document.getElementById('f_freq').value==='anual'?'block':'none';
 }
 async function saveExtra(){
   const name=val('e_name'),amount=parseFloat(val('e_amount'));
