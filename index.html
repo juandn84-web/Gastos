@@ -568,28 +568,43 @@ function openPendDetail(pay){
   }
   openModal('Pendiente · '+cajaLbl,html);
 }
-/* Cambio 3: comprometido futuro agrupado por mes */
+/* Próximos cobros de fijos anuales (la primera ocurrencia tras el mes actual, dentro de ~1 año) */
+function futureAnnuals(now){
+  const y=now.getFullYear(),m=now.getMonth();
+  const finThis=new Date(y,m+1,0);                 // último día del mes actual
+  const limit=new Date(y,m+1+12,0);                // hasta ~12 meses vista
+  const res=[];
+  data.recurrentes.filter(isAnual).forEach(r=>{
+    for(let yy=y;yy<=y+1;yy++){
+      const eom=new Date(yy,chMonth(r)+1,0).getDate();
+      const d=new Date(yy,chMonth(r),Math.min(Number(r.day)||1,eom));
+      if(d>finThis&&d<=limit){res.push({date:isoD(d),name:r.name,category:r.category,amount:chargeAmt(r),pay:r.pay,anual:true});break;}
+    }
+  });
+  return res;
+}
+/* Cambio 3: comprometido futuro agrupado por mes (puntuales + próximos anuales) */
 function openFuturoDetail(){
   const now=new Date(),y=now.getFullYear(),m=now.getMonth();
   const finMes=isoD(new Date(y,m+1,0));
-  const futuros=data.extras.filter(e=>e.date>finMes);
-  const total=futuros.reduce((s,e)=>s+(Number(e.amount)||0),0);
-  let html='<div class="m-sub">Gastos puntuales ya apuntados con fecha de meses siguientes. Aún no descuentan, pero conviene tenerlos presentes.</div>';
+  const futuros=data.extras.filter(e=>e.date>finMes).map(e=>({date:e.date,name:e.name,category:e.category,amount:Number(e.amount)||0,pay:e.pay,anual:false})).concat(futureAnnuals(now));
+  const total=futuros.reduce((s,e)=>s+e.amount,0);
+  let html='<div class="m-sub">Lo que ya sabes que se cobrará en meses siguientes: puntuales apuntados y el próximo cargo de tus fijos anuales. Aún no descuenta, pero conviene tenerlo presente.</div>';
   if(!futuros.length){
-    html+='<div class="empty"><b>Nada comprometido</b>No tienes gastos puntuales apuntados para meses futuros.</div>';
+    html+='<div class="empty"><b>Nada comprometido</b>No tienes gastos puntuales ni fijos anuales para los próximos meses.</div>';
     openModal('Comprometido a futuro',html);return;
   }
   const groups={};
   futuros.forEach(e=>{const d=new Date(e.date+'T00:00:00');const k=d.getFullYear()*12+d.getMonth();(groups[k]=groups[k]||[]).push(e);});
   Object.keys(groups).map(Number).sort((a,b)=>a-b).forEach(k=>{
     const arr=groups[k].sort((a,b)=>new Date(a.date)-new Date(b.date));
-    const suma=arr.reduce((s,e)=>s+(Number(e.amount)||0),0);
+    const suma=arr.reduce((s,e)=>s+e.amount,0);
     const d=new Date(Math.floor(k/12),k%12,1);
     const titulo=d.toLocaleDateString('es-ES',{month:'long',year:'numeric'});
     html+='<div class="fm-group"><div class="fm-head"><span>'+titulo+'</span><b>'+eur(suma)+'</b></div>';
-    html+=arr.map(e=>`<div class="pd-row box pd-extra">
+    html+=arr.map(e=>`<div class="pd-row box ${e.anual?'pd-anual':'pd-extra'}">
         <div class="pd-day"><b>${new Date(e.date+'T00:00:00').getDate()}</b><small>día</small></div>
-        <div class="pd-info"><div class="pd-name">${esc(e.name)}</div><div class="pd-cat">${esc(e.category||'Otros')} · ${payLabel(e.pay)}</div></div>
+        <div class="pd-info"><div class="pd-name">${esc(e.name)}</div><div class="pd-cat">${esc(e.category||'Otros')} · ${payLabel(e.pay)}${e.anual?' · Fijo anual':''}</div></div>
         <div class="pd-amt">${eur(e.amount)}</div>
       </div>`).join('');
     html+='</div>';
@@ -693,7 +708,8 @@ function render(){
 
   // Gastos ya apuntados para meses siguientes (no restan a\u00fan, pero se avisan)
   const finMes=isoLocal(new Date(y,m+1,0));
-  const futuro=data.extras.filter(e=>e.date>finMes).reduce((s,e)=>s+(Number(e.amount)||0),0);
+  const futuro=data.extras.filter(e=>e.date>finMes).reduce((s,e)=>s+(Number(e.amount)||0),0)
+              +futureAnnuals(now).reduce((s,e)=>s+e.amount,0);
   const hf=document.getElementById('heroFuturo');
   if(futuro>0){hf.classList.remove('hidden');hf.innerHTML='<span>Comprometido para pr\u00f3ximos meses: '+eur(futuro)+'</span><span class="go">\u203a</span>';}
   else hf.classList.add('hidden');
