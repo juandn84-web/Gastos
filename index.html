@@ -183,7 +183,6 @@
   .pd-amt{font-weight:600;font-size:15px;color:var(--gasto);white-space:nowrap}
   .pd-total{display:flex;justify-content:space-between;align-items:center;margin-top:16px;padding:14px 16px;background:var(--gasto-soft);border-radius:18px;font-weight:700;color:var(--gasto)}
   .pd-total b{font-size:18px}
-  .pend-row .go{color:var(--efeoro);opacity:.7;font-size:15px;margin-left:2px}
 
   /* Comprometido: clicable */
   .futuro-line{display:flex;align-items:center;justify-content:space-between;cursor:pointer}
@@ -289,9 +288,9 @@
         <button class="pn-btn" onclick="pendShift(1)" aria-label="Mes siguiente">›</button>
       </span>
     </div>
-    <div class="pend-row" onclick="openPendDetail('ing')"><span class="bk"><i class="dt dt-ing"></i>ING</span><span class="pc-cnt" id="ingPendN"></span><b class="num" id="ingPend">—</b><span class="go">›</span></div>
-    <div class="pend-row" onclick="openPendDetail('unicaja')"><span class="bk"><i class="dt dt-uni"></i>UNICAJA</span><span class="pc-cnt" id="uniPendN"></span><b class="num" id="uniPend">—</b><span class="go">›</span></div>
-    <div class="pend-row" onclick="openPendDetail('efectivo')"><span class="bk"><i class="dt dt-efe"></i>EFECTIVO</span><span class="pc-cnt" id="efePendN"></span><b class="num" id="efePend">—</b><span class="go">›</span></div>
+    <div class="pend-row" onclick="openPendDetail('ing')"><span class="bk"><i class="dt dt-ing"></i>ING</span><span class="pc-cnt" id="ingPendN"></span><b class="num" id="ingPend">—</b></div>
+    <div class="pend-row" onclick="openPendDetail('unicaja')"><span class="bk"><i class="dt dt-uni"></i>UNICAJA</span><span class="pc-cnt" id="uniPendN"></span><b class="num" id="uniPend">—</b></div>
+    <div class="pend-row" onclick="openPendDetail('efectivo')"><span class="bk"><i class="dt dt-efe"></i>EFECTIVO</span><span class="pc-cnt" id="efePendN"></span><b class="num" id="efePend">—</b></div>
   </div>
   <div class="futuro-line hidden" id="heroFuturo" onclick="openFuturoDetail()"></div>
 
