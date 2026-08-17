@@ -517,7 +517,13 @@ function fillExtras(){
   }
   L.innerHTML='<div class="list"></div>';
   const box=L.querySelector('.list');
-  [...exVis].sort((a,b)=>new Date(a.date)-new Date(b.date)).forEach(e=>{
+  const ordenados=[...exVis].sort((a,b)=>{
+    const pa=a.date<=todayStr,pb=b.date<=todayStr;
+    if(pa!==pb)return pa?-1:1;                                   // pagados arriba, pendientes al fondo
+    if(pa)return new Date(b.date)-new Date(a.date);              // pagados: más reciente primero
+    return new Date(a.date)-new Date(b.date);                    // pendientes: más próximo primero
+  });
+  ordenados.forEach(e=>{
     const pagado=e.date<=todayStr;
     const dia=new Date(e.date+'T00:00:00').getDate();
     const el=document.createElement('div');el.className='item '+(pagado?'pagado':'porpagar');
