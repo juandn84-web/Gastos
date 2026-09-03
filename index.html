@@ -66,16 +66,10 @@
   .p-adj{cursor:pointer}
   .p-adj span{color:var(--moca);font-weight:600;text-decoration:underline;text-underline-offset:2px}
   .ver-tag{position:fixed;right:14px;bottom:9px;font-size:10.5px;color:var(--faint);opacity:.55;z-index:1;pointer-events:none;font-variant-numeric:tabular-nums;letter-spacing:.02em}
-  .cob-head{display:flex;justify-content:space-between;align-items:baseline;margin-top:14px;font-size:12.5px;color:var(--muted)}
-  .cob-head b{color:var(--ink);font-weight:700}
-  .cob-list{margin-top:8px;max-height:190px;overflow:auto;border-radius:14px;background:#F4EFE7}
-  .cob-row{display:grid;grid-template-columns:26px 1fr auto;align-items:center;gap:10px;padding:8px 12px;font-size:13px;border-top:1px solid var(--line)}
-  .cob-row:first-child{border-top:0}
-  .cob-d{color:var(--faint);font-weight:600;text-align:center}
-  .cob-n{color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .cob-n i{font-style:normal;font-size:10px;color:var(--faint);border:1px solid var(--line);border-radius:8px;padding:1px 5px;margin-left:5px}
-  .cob-a{color:var(--gasto);font-weight:600;white-space:nowrap}
-  .cob-empty{margin-top:8px;font-size:12.5px;color:var(--faint);background:#F4EFE7;border-radius:12px;padding:11px 12px}
+  .cob-head{display:flex;justify-content:space-between;align-items:baseline;margin-top:18px;font-size:12.5px;color:var(--muted)}
+  .cob-head b{color:var(--gasto);font-weight:700;font-size:15px}
+  .cob-list{margin-top:2px;max-height:230px;overflow:auto;padding-right:2px}
+  .cob-empty{margin-top:8px;font-size:12.5px;color:var(--faint);background:#F4EFE7;border-radius:14px;padding:12px 13px}
   .p-row{display:flex;justify-content:space-between;align-items:baseline;gap:6px;font-size:12.5px;color:var(--muted);padding:5px 0;border-top:1px solid var(--line)}
   .p-row b{font-weight:600;color:var(--ink);white-space:nowrap}
   .pos{color:var(--ingreso)!important}
@@ -208,6 +202,7 @@
   .pd-fijo{background:#E7E0D2;border-left:5px solid #A8987E}
   .pd-anual{background:#EADBC0;border-left:5px solid #8A6D3B}
   .pd-extra{background:#EFD8C6;border-left:5px solid #BE855C}
+  .pd-ajuste{background:#E3E7DC;border-left:5px solid #7E8A6B}
   .fj-tot{display:flex;gap:10px;margin:2px 0 12px}
   .fj-tot>div{flex:1;background:var(--surface);border-radius:16px;padding:11px 14px;box-shadow:var(--shadow)}
   .fj-tot b{display:block;font-size:19px;font-weight:600;color:var(--ink)}
@@ -320,7 +315,7 @@
 
 <script>
 const KEY='gastos:data';
-const APP_VERSION='14';
+const APP_VERSION='16';
 // Dentro de Claude usa window.storage; abierta en local (descargada) usa el almacenamiento del navegador.
 const store=(typeof window!=='undefined'&&window.storage)?window.storage:{
   get:async k=>{const v=localStorage.getItem(k);return v===null?null:{key:k,value:v};},
@@ -363,28 +358,16 @@ const retOf=i=>(Number(i.base)||0)*(Number(i.retPct)||0)/100;
 const netoOf=i=>(Number(i.base)||0)-retOf(i);           // lo realmente disponible
 const cobradoOf=i=>(Number(i.base)||0)+ivaOf(i)-retOf(i); // lo que entra en cuenta
 
-let storageBlocked=false;
 async function load(){
   if(navigator.storage&&navigator.storage.persist){try{await navigator.storage.persist();}catch(e){}}
-  let readOk=false,fresh=false;
+  let readError=false,hadData=false;
   try{
     const res=await store.get(KEY);
-    if(res&&res.value!=null){data=JSON.parse(res.value);readOk=true;}
-    else{readOk=true;fresh=true;}          // null = aún no hay datos (primer uso real)
+    if(res&&res.value!=null){data=JSON.parse(res.value);hadData=true;}
   }catch(e){
-    readOk=false;                          // fallo de lectura: NO asumas que está vacío
+    readError=true;                         // no se pudo leer (o dato corrupto)
   }
-  if(!readOk){
-    // No pudimos leer. Mostramos la semilla SOLO en memoria y NO tocamos el almacén,
-    // para no machacar datos que puedan seguir guardados. Avisamos y salimos.
-    data={recurrentes:SEED.recurrentes.map(s=>({...s})),extras:[],ingresos:[],caja:[],saldos:null};
-    storageBlocked=true;
-    render();
-    setTimeout(()=>alert('No pude cargar tus datos guardados en este arranque. Para no borrarlos, no guardaré cambios ahora. Cierra la app y vuelve a abrirla; si sigue igual, restaura tu copia de seguridad.'),300);
-    return;
-  }
-  storageBlocked=false;
-  if(fresh||!data||typeof data!=='object')data={recurrentes:[],extras:[],ingresos:[],caja:[],saldos:null};
+  if(!hadData)data={recurrentes:[],extras:[],ingresos:[],caja:[],saldos:null};
   if(!data.recurrentes)data.recurrentes=[];
   if(!data.extras)data.extras=[];
   if(!data.ingresos)data.ingresos=[];
@@ -395,10 +378,10 @@ async function load(){
   data.recurrentes.forEach(r=>{if(!r.day)r.day=1;});
   if(data.saldos&&data.saldos.ing===undefined){
     data.saldos={ing:Number(data.saldos.cuenta)||0,unicaja:0,efectivo:Number(data.saldos.efectivo)||0,desde:data.saldos.desde};
-    await save();
+    if(!readError)await save();
   }
   // Corrección 09/08/2026: la nómina se apunta a mano cada mes; se retira la autocargada.
-  if(data.ingresos.some(i=>i.id==='i_nom_202608')){data.ingresos=data.ingresos.filter(i=>i.id!=='i_nom_202608');await save();}
+  if(data.ingresos.some(i=>i.id==='i_nom_202608')){data.ingresos=data.ingresos.filter(i=>i.id!=='i_nom_202608');if(!readError)await save();}
   // Fusiona la semilla: añade lo que aún no esté (por id), sin tocar lo demás.
   let changed=false;
   SEED.recurrentes.forEach(s=>{
@@ -407,13 +390,15 @@ async function load(){
   (SEED.ingresos||[]).forEach(s=>{
     if(!data.ingresos.some(i=>i.id===s.id)){data.ingresos.push({...s});changed=true;}
   });
-  if(changed)await save();
+  // Solo auto-guardamos la semilla si la lectura fue limpia (para no machacar datos que existan).
+  if(changed&&!readError)await save();
   render();
 }
 async function save(){
-  if(storageBlocked)return;               // no escribir tras un fallo de lectura: evita machacar
-  try{await store.set(KEY,JSON.stringify(data));}
-  catch(e){console.error('No se pudo guardar',e);}
+  try{await store.set(KEY,JSON.stringify(data));return;}
+  catch(e){}
+  try{localStorage.setItem(KEY,JSON.stringify(data));}
+  catch(e2){console.error('No se pudo guardar',e2);alert('⚠️ No se pudieron guardar los cambios en este dispositivo. Revisa que no estés en modo privado.');}
 }
 
 const cap=s=>s[0].toUpperCase()+s.slice(1);
@@ -692,15 +677,22 @@ function openAjusteSaldo(p){
   const cob=[];
   data.recurrentes.filter(r=>(r.pay||'ing')===p&&chargesIn(r,m)).forEach(r=>{
     const fs=isoLocalD(new Date(y,m,Math.min(Number(r.day)||1,eomDia)));
-    if(fs<=todayStr)cob.push({name:r.name,amount:chargeAmt(r),date:fs,fijo:true});
+    if(fs<=todayStr)cob.push({name:r.name,amount:chargeAmt(r),date:fs,fijo:true,cat:r.category||'Otros'});
   });
   data.extras.filter(e=>(e.pay||'ing')===p&&e.date&&e.date.slice(0,7)===mesPref&&e.date<=todayStr).forEach(e=>{
-    cob.push({name:e.name,amount:Number(e.amount)||0,date:e.date,fijo:false});
+    cob.push({name:e.name,amount:Number(e.amount)||0,date:e.date,fijo:false,cat:e.category||'Otros',ajuste:!!e.ajuste});
   });
   cob.sort((a,b)=>a.date<b.date?1:a.date>b.date?-1:0);
   const totCob=cob.reduce((s,c)=>s+c.amount,0);
-  const cobHtml=`<div class="cob-head"><span>Cobrado este mes en ${lbl}</span><b>${eur(totCob)}</b></div>`+
-    (cob.length?`<div class="cob-list">${cob.map(c=>`<div class="cob-row"><span class="cob-d">${new Date(c.date+'T00:00:00').getDate()}</span><span class="cob-n">${esc(c.name)}${c.fijo?' <i>fijo</i>':''}</span><span class="cob-a">${eur(c.amount)}</span></div>`).join('')}</div>`:'<div class="cob-empty">Nada cobrado aún este mes.</div>');
+  const cobHtml=`<div class="cob-head"><span>Ya cobrado este mes en ${lbl}</span><b>${eur(totCob)}</b></div>`+
+    (cob.length
+      ?'<div class="pd-legend"><span><i style="background:#A8987E"></i>Fijo</span><span><i style="background:#BE855C"></i>Puntual</span><span><i style="background:#7E8A6B"></i>Ajuste</span></div>'+
+       `<div class="cob-list">${cob.map(c=>`<div class="pd-row box ${c.ajuste?'pd-ajuste':c.fijo?'pd-fijo':'pd-extra'}">
+          <div class="pd-day"><b>${new Date(c.date+'T00:00:00').getDate()}</b><small>día</small></div>
+          <div class="pd-info"><div class="pd-name">${esc(c.name)}</div><div class="pd-cat">${esc(c.cat||'Otros')}${c.fijo?' · Fijo':''}</div></div>
+          <div class="pd-amt">${eur(c.amount)}</div>
+        </div>`).join('')}</div>`
+      :'<div class="cob-empty">Nada cobrado aún este mes.</div>');
   openModal('Saldo real · '+lbl,`<div class="form">
     <div class="prev">La app calcula que ahora tienes <b>${eur(disp)}</b> en ${lbl}. Si tu banco dice otra cosa (por los pagos pequeños sin apuntar), escribe el saldo real y cuadro la diferencia con un apunte «Ajuste de saldo».</div>
     <div class="field"><label>¿Cuánto tienes ahora mismo en ${lbl}?</label><input id="aj_real" type="number" inputmode="decimal" step="0.01" placeholder="0,00" value="${disp.toFixed(2)}"></div>
@@ -1391,7 +1383,9 @@ async function loadBackup(){
 if('serviceWorker' in navigator && location.protocol==='https:'){
   navigator.serviceWorker.register('sw.js').catch(()=>{});
 }
-document.getElementById('verTag').textContent='v'+APP_VERSION;
+function paintVersion(){const vt=document.getElementById('verTag');if(vt)vt.textContent='v'+APP_VERSION;}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',paintVersion);
+else paintVersion();
 load();
 </script>
 
