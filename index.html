@@ -15,7 +15,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<script src="xlsx.min.js"></script>
+
 <style>
   :root{
     color-scheme:light only;
@@ -30,7 +30,7 @@
   *{box-sizing:border-box;margin:0;padding:0}
   html{background:#E9E3DA}
   html,body{background:#E9E3DA;color:var(--ink);font-family:'Inter',system-ui,sans-serif;-webkit-font-smoothing:antialiased;forced-color-adjust:none}
-  body{max-width:560px;margin:0 auto;padding:18px 16px 24px;min-height:100vh;position:relative}
+  body{max-width:560px;margin:0 auto;padding:14px 16px 16px;min-height:100vh;position:relative}
   body::before{content:'';position:fixed;left:0;top:0;right:0;bottom:0;z-index:-1;pointer-events:none;
     background:#E9E3DA;
     background-image:radial-gradient(560px 460px at -12% 22%,rgba(206,192,174,.45),transparent 70%),
@@ -43,13 +43,13 @@
   .hh-title{font-size:23px;font-weight:700;letter-spacing:-.01em}
   .hh-sub{font-size:13px;color:var(--muted);margin-top:3px}
   .gold-btn{width:46px;height:46px;border-radius:50%;border:0;background:var(--oro);color:#FFF9EE;font-size:24px;font-weight:600;cursor:pointer;box-shadow:var(--shadow);line-height:1}
-  .hero-num{font-size:44px;font-weight:300;letter-spacing:-.02em;margin-top:12px}
+  .hero-num{font-size:40px;font-weight:300;letter-spacing:-.02em;margin-top:6px}
   .hero-cap{font-size:13px;color:var(--muted);margin-top:2px}
 
   /* Accesos rápidos */
-  .quick{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:14px}
+  .quick{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:10px}
   .q{display:flex;flex-direction:column;align-items:center;gap:7px;background:none;border:0;cursor:pointer;font-family:inherit;padding:0}
-  .q .ic{width:52px;height:52px;border-radius:50%;background:var(--surface);box-shadow:var(--shadow);display:flex;align-items:center;justify-content:center;font-size:19px;color:var(--moca);font-weight:600}
+  .q .ic{width:47px;height:47px;border-radius:50%;background:var(--surface);box-shadow:var(--shadow);display:flex;align-items:center;justify-content:center;font-size:18px;color:var(--moca);font-weight:600}
   .q .lb{font-size:12px;font-weight:600;color:var(--muted)}
 
   /* Puntos de identidad */
@@ -57,15 +57,26 @@
   .dt-ing{background:var(--teja)} .dt-uni{background:var(--salvia)} .dt-efe{background:var(--oro)}
 
   /* Paneles */
-  .paneles{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
-  .panel{background:var(--surface);border-radius:26px;padding:15px 16px 7px;box-shadow:var(--shadow)}
+  .paneles{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+  .panel{background:var(--surface);border-radius:24px;padding:12px 15px 6px;box-shadow:var(--shadow)}
   .panel.span2{grid-column:1/-1}
   .p-title{font-size:12px;font-weight:700;letter-spacing:.08em;color:var(--muted);display:flex;align-items:center}
-  .p-big{font-size:26px;font-weight:300;letter-spacing:-.01em;margin-top:6px}
-  .p-cap{font-size:11.5px;color:var(--faint);margin:2px 0 7px}
+  .p-big{font-size:24px;font-weight:300;letter-spacing:-.01em;margin-top:3px}
+  .p-cap{font-size:11.5px;color:var(--faint);margin:1px 0 6px}
   .p-adj{cursor:pointer}
   .p-adj span{color:var(--moca);font-weight:600;text-decoration:underline;text-underline-offset:2px}
-  .p-row{display:flex;justify-content:space-between;align-items:baseline;gap:6px;font-size:12.5px;color:var(--muted);padding:6px 0;border-top:1px solid var(--line)}
+  .ver-tag{position:fixed;right:14px;bottom:9px;font-size:10.5px;color:var(--faint);opacity:.55;z-index:1;pointer-events:none;font-variant-numeric:tabular-nums;letter-spacing:.02em}
+  .cob-head{display:flex;justify-content:space-between;align-items:baseline;margin-top:14px;font-size:12.5px;color:var(--muted)}
+  .cob-head b{color:var(--ink);font-weight:700}
+  .cob-list{margin-top:8px;max-height:190px;overflow:auto;border-radius:14px;background:#F4EFE7}
+  .cob-row{display:grid;grid-template-columns:26px 1fr auto;align-items:center;gap:10px;padding:8px 12px;font-size:13px;border-top:1px solid var(--line)}
+  .cob-row:first-child{border-top:0}
+  .cob-d{color:var(--faint);font-weight:600;text-align:center}
+  .cob-n{color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .cob-n i{font-style:normal;font-size:10px;color:var(--faint);border:1px solid var(--line);border-radius:8px;padding:1px 5px;margin-left:5px}
+  .cob-a{color:var(--gasto);font-weight:600;white-space:nowrap}
+  .cob-empty{margin-top:8px;font-size:12.5px;color:var(--faint);background:#F4EFE7;border-radius:12px;padding:11px 12px}
+  .p-row{display:flex;justify-content:space-between;align-items:baseline;gap:6px;font-size:12.5px;color:var(--muted);padding:5px 0;border-top:1px solid var(--line)}
   .p-row b{font-weight:600;color:var(--ink);white-space:nowrap}
   .pos{color:var(--ingreso)!important}
   .neg{color:var(--gasto)!important}
@@ -78,7 +89,7 @@
   .pn-btn{width:34px;height:34px;border-radius:50%;border:0;background:var(--surface);color:var(--moca);cursor:pointer;font-size:16px;line-height:1;display:flex;align-items:center;justify-content:center;padding:0;box-shadow:var(--shadow)}
 
   /* Pendiente: tarjeta moca */
-  .pend-block{background:rgba(95,79,65,.96);border-radius:26px;padding:13px 18px 4px;margin-top:12px;box-shadow:var(--shadow)}
+  .pend-block{background:rgba(95,79,65,.96);border-radius:24px;padding:11px 16px 4px;margin-top:10px;box-shadow:var(--shadow)}
   .pend-head{display:flex;align-items:center;gap:8px;padding-bottom:10px}
   .pend-head .pn-title{font-size:15px;font-weight:700;color:#F6F1E8;white-space:nowrap}
   .pend-tot{font-size:16px;font-weight:600;color:#EFC7A9;white-space:nowrap}
@@ -90,14 +101,14 @@
   .pend-row b{font-size:16px;text-align:right;color:#EFC7A9}
   .bk{display:flex;align-items:center;font-size:12.5px;font-weight:700;letter-spacing:.05em}
 
-  .futuro-line{margin-top:10px;font-size:12.5px;color:var(--efeoro);background:#EFE6D2;border-radius:16px;padding:10px 14px}
+  .futuro-line{margin-top:8px;font-size:12.5px;color:var(--efeoro);background:#EFE6D2;border-radius:16px;padding:9px 14px}
   .saldos-line{text-align:center;margin-top:8px}
   .tot-edit{border:0;background:none;color:var(--faint);font-family:inherit;font-size:12px;cursor:pointer;padding:6px 0 0;text-decoration:underline;text-underline-offset:2px}
   .tot-edit:hover{color:var(--ink)}
   .tot-note{font-size:12px;color:var(--muted);background:#F2EDE3;border-radius:12px;padding:9px 11px;margin-top:8px}
 
   /* Pestañas */
-  .tabs{display:flex;gap:6px;background:#DFD8CC;border-radius:28px;padding:5px;margin-top:22px}
+  .tabs{display:flex;gap:6px;background:#DFD8CC;border-radius:28px;padding:5px;margin-top:14px}
   .tab{flex:1;border:0;background:transparent;color:var(--muted);font-family:inherit;font-size:14px;font-weight:600;padding:10px;border-radius:23px;cursor:pointer;transition:.15s}
   .tab.active{background:var(--surface);color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.05)}
 
@@ -268,24 +279,24 @@
   </div>
 
   <div class="paneles">
-    <div class="panel ing">
+    <div class="panel ing" onclick="openAjusteSaldo('ing')">
       <div class="p-title"><i class="dt dt-ing"></i>ING</div>
       <div class="p-big num" id="ingDisp">—</div>
-      <div class="p-cap p-adj" onclick="openAjusteSaldo('ing')">disponible ahora · <span>ajustar ✎</span></div>
+      <div class="p-cap">disponible ahora</div>
       <div class="p-row"><span>Balance del mes</span><b class="num" id="ingBal">—</b></div>
       <div class="p-row"><span>Quedará</span><b class="num" id="ingQueda">—</b></div>
     </div>
-    <div class="panel uni">
+    <div class="panel uni" onclick="openAjusteSaldo('unicaja')">
       <div class="p-title"><i class="dt dt-uni"></i>UNICAJA</div>
       <div class="p-big num" id="uniDisp">—</div>
-      <div class="p-cap p-adj" onclick="openAjusteSaldo('unicaja')">disponible ahora · <span>ajustar ✎</span></div>
+      <div class="p-cap">disponible ahora</div>
       <div class="p-row"><span>Balance del mes</span><b class="num" id="uniBal">—</b></div>
       <div class="p-row"><span>Quedará</span><b class="num" id="uniQueda">—</b></div>
     </div>
-    <div class="panel efe span2">
+    <div class="panel efe span2" onclick="openAjusteSaldo('efectivo')">
       <div class="p-title"><i class="dt dt-efe"></i>EFECTIVO</div>
       <div class="p-big num" id="efeDisp">—</div>
-      <div class="p-cap p-adj" onclick="openAjusteSaldo('efectivo')">disponible ahora · <span>ajustar ✎</span></div>
+      <div class="p-cap">disponible ahora</div>
       <div class="p-row"><span>Balance del mes</span><b class="num" id="efeBal">—</b></div>
       <div class="p-row"><span>Quedará</span><b class="num" id="efeQueda">—</b></div>
     </div>
@@ -309,12 +320,13 @@
 
 <script>
 const KEY='gastos:data';
+const APP_VERSION='14';
 // Dentro de Claude usa window.storage; abierta en local (descargada) usa el almacenamiento del navegador.
 const store=(typeof window!=='undefined'&&window.storage)?window.storage:{
-  get:async k=>{const v=localStorage.getItem(k);if(v===null)throw new Error('sin datos');return{key:k,value:v};},
+  get:async k=>{const v=localStorage.getItem(k);return v===null?null:{key:k,value:v};},
   set:async(k,v)=>{localStorage.setItem(k,v);return{key:k,value:v};}
 };
-const CATS=['Vivienda','Suministros','Vehículo','Seguros','Autónomo / SS','Telefonía','Suscripciones','Alimentación','Ocio','El Mirador','Viajes','Regalos','Salud','Educación','Otros'];
+const CATS=['Vivienda','Suministros','Vehículo','Seguros','Autónomo / SS','Telefonía','Suscripciones','Alimentación','Ocio','El Mirador','Viajes','Regalos','Salud','Educación','Ajuste de saldo','Otros'];
 const FREQS=[['mensual','al mes',1],['anual','al año',12]];
 const MESES=['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
 const isAnual=r=>r.freq==='anual';
@@ -351,18 +363,33 @@ const retOf=i=>(Number(i.base)||0)*(Number(i.retPct)||0)/100;
 const netoOf=i=>(Number(i.base)||0)-retOf(i);           // lo realmente disponible
 const cobradoOf=i=>(Number(i.base)||0)+ivaOf(i)-retOf(i); // lo que entra en cuenta
 
+let storageBlocked=false;
 async function load(){
+  if(navigator.storage&&navigator.storage.persist){try{await navigator.storage.persist();}catch(e){}}
+  let readOk=false,fresh=false;
   try{
     const res=await store.get(KEY);
-    data=JSON.parse(res.value);
-    if(!data.recurrentes)data.recurrentes=[];
-    if(!data.extras)data.extras=[];
-    if(!data.ingresos)data.ingresos=[];
-    if(!data.caja)data.caja=[];
-    if(data.saldos===undefined)data.saldos=null;
+    if(res&&res.value!=null){data=JSON.parse(res.value);readOk=true;}
+    else{readOk=true;fresh=true;}          // null = aún no hay datos (primer uso real)
   }catch(e){
-    data={recurrentes:[],extras:[],ingresos:[],caja:[],saldos:null};
+    readOk=false;                          // fallo de lectura: NO asumas que está vacío
   }
+  if(!readOk){
+    // No pudimos leer. Mostramos la semilla SOLO en memoria y NO tocamos el almacén,
+    // para no machacar datos que puedan seguir guardados. Avisamos y salimos.
+    data={recurrentes:SEED.recurrentes.map(s=>({...s})),extras:[],ingresos:[],caja:[],saldos:null};
+    storageBlocked=true;
+    render();
+    setTimeout(()=>alert('No pude cargar tus datos guardados en este arranque. Para no borrarlos, no guardaré cambios ahora. Cierra la app y vuelve a abrirla; si sigue igual, restaura tu copia de seguridad.'),300);
+    return;
+  }
+  storageBlocked=false;
+  if(fresh||!data||typeof data!=='object')data={recurrentes:[],extras:[],ingresos:[],caja:[],saldos:null};
+  if(!data.recurrentes)data.recurrentes=[];
+  if(!data.extras)data.extras=[];
+  if(!data.ingresos)data.ingresos=[];
+  if(!data.caja)data.caja=[];
+  if(data.saldos===undefined)data.saldos=null;
   // Compatibilidad: todo lo antiguo sin método de pago se asume "cuenta".
   [...data.recurrentes,...data.extras,...data.ingresos].forEach(x=>{if(!x.pay||x.pay==='cuenta')x.pay='ing';});
   data.recurrentes.forEach(r=>{if(!r.day)r.day=1;});
@@ -384,6 +411,7 @@ async function load(){
   render();
 }
 async function save(){
+  if(storageBlocked)return;               // no escribir tras un fallo de lectura: evita machacar
   try{await store.set(KEY,JSON.stringify(data));}
   catch(e){console.error('No se pudo guardar',e);}
 }
@@ -510,7 +538,7 @@ function openExtras(){currentModal='extras';exCat='__all';exPay='__all';openModa
        <option value="unicaja">Unicaja</option>
        <option value="efectivo">Efectivo</option>
      </select>
-   </div>`+shell('ex','+ Apuntar gasto extra','extra')+'<button class="add" id="mFile" onclick="openFile()" style="margin-top:8px">📄 Cargar archivo del banco (Excel/CSV)</button><button class="add" id="mPaste" onclick="openPaste()" style="margin-top:8px">📋 Pegar movimientos del banco</button><input type="file" id="bankFileInput" accept=".xls,.xlsx,.csv" style="display:none" onchange="handleBankFile(this)">');
+   </div>`+shell('ex','+ Apuntar gasto extra','extra'));
   fillExtras();
 }
 function fillExtras(){
@@ -657,10 +685,27 @@ function openAjusteSaldo(p){
   const lbl=p==='efectivo'?'Efectivo':p==='unicaja'?'Unicaja':'ING';
   if(disp==null){openModal('Saldo real · '+lbl,'<div class="form"><div class="wipe-note">Primero fija un saldo de partida en Ajustes ⚙.</div></div>');return;}
   ajusteP=p;currentModal='ajusteSaldo';
+  // Cobrado este mes en esta cuenta (fijos ya cargados + puntuales del mes hasta hoy)
+  const now=new Date(),y=now.getFullYear(),m=now.getMonth();
+  const todayStr=isoLocalD(now);const mesPref=todayStr.slice(0,7);
+  const eomDia=new Date(y,m+1,0).getDate();
+  const cob=[];
+  data.recurrentes.filter(r=>(r.pay||'ing')===p&&chargesIn(r,m)).forEach(r=>{
+    const fs=isoLocalD(new Date(y,m,Math.min(Number(r.day)||1,eomDia)));
+    if(fs<=todayStr)cob.push({name:r.name,amount:chargeAmt(r),date:fs,fijo:true});
+  });
+  data.extras.filter(e=>(e.pay||'ing')===p&&e.date&&e.date.slice(0,7)===mesPref&&e.date<=todayStr).forEach(e=>{
+    cob.push({name:e.name,amount:Number(e.amount)||0,date:e.date,fijo:false});
+  });
+  cob.sort((a,b)=>a.date<b.date?1:a.date>b.date?-1:0);
+  const totCob=cob.reduce((s,c)=>s+c.amount,0);
+  const cobHtml=`<div class="cob-head"><span>Cobrado este mes en ${lbl}</span><b>${eur(totCob)}</b></div>`+
+    (cob.length?`<div class="cob-list">${cob.map(c=>`<div class="cob-row"><span class="cob-d">${new Date(c.date+'T00:00:00').getDate()}</span><span class="cob-n">${esc(c.name)}${c.fijo?' <i>fijo</i>':''}</span><span class="cob-a">${eur(c.amount)}</span></div>`).join('')}</div>`:'<div class="cob-empty">Nada cobrado aún este mes.</div>');
   openModal('Saldo real · '+lbl,`<div class="form">
     <div class="prev">La app calcula que ahora tienes <b>${eur(disp)}</b> en ${lbl}. Si tu banco dice otra cosa (por los pagos pequeños sin apuntar), escribe el saldo real y cuadro la diferencia con un apunte «Ajuste de saldo».</div>
     <div class="field"><label>¿Cuánto tienes ahora mismo en ${lbl}?</label><input id="aj_real" type="number" inputmode="decimal" step="0.01" placeholder="0,00" value="${disp.toFixed(2)}"></div>
     <div id="aj_prev" class="ok-note"></div>
+    ${cobHtml}
     <div class="form-actions">
       <button class="btn" onclick="closeModal()">Cancelar</button>
       <button class="btn primary" onclick="saveAjusteSaldo()">Ajustar</button>
@@ -678,7 +723,7 @@ async function saveAjusteSaldo(){
   if(isNaN(real)){formErr('Escribe el saldo real.');return;}
   const diff=dispDe(p)-real;
   if(Math.abs(diff)<0.005){closeModal();return;}
-  data.extras.push({id:uid(),name:'Ajuste de saldo',amount:diff,date:isoD(new Date()),category:'Otros',note:'Cuadre manual del saldo real',pay:p,ajuste:1});
+  data.extras.push({id:uid(),name:'Ajuste de saldo',amount:diff,date:isoD(new Date()),category:'Ajuste de saldo',note:'Cuadre manual del saldo real',pay:p,ajuste:1});
   await save();closeModal();render();
 }
 function render(){
@@ -1346,6 +1391,7 @@ async function loadBackup(){
 if('serviceWorker' in navigator && location.protocol==='https:'){
   navigator.serviceWorker.register('sw.js').catch(()=>{});
 }
+document.getElementById('verTag').textContent='v'+APP_VERSION;
 load();
 </script>
 
@@ -1356,5 +1402,6 @@ load();
     <div id="modalBody"></div>
   </div>
 </div>
+<div class="ver-tag" id="verTag"></div>
 </body>
 </html>
