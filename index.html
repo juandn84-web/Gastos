@@ -63,6 +63,8 @@
   .p-title{font-size:12px;font-weight:700;letter-spacing:.08em;color:var(--muted);display:flex;align-items:center}
   .p-big{font-size:26px;font-weight:300;letter-spacing:-.01em;margin-top:6px}
   .p-cap{font-size:11.5px;color:var(--faint);margin:2px 0 7px}
+  .p-adj{cursor:pointer}
+  .p-adj span{color:var(--moca);font-weight:600;text-decoration:underline;text-underline-offset:2px}
   .p-row{display:flex;justify-content:space-between;align-items:baseline;gap:6px;font-size:12.5px;color:var(--muted);padding:6px 0;border-top:1px solid var(--line)}
   .p-row b{font-weight:600;color:var(--ink);white-space:nowrap}
   .pos{color:var(--ingreso)!important}
@@ -269,21 +271,21 @@
     <div class="panel ing">
       <div class="p-title"><i class="dt dt-ing"></i>ING</div>
       <div class="p-big num" id="ingDisp">—</div>
-      <div class="p-cap">disponible ahora</div>
+      <div class="p-cap p-adj" onclick="openAjusteSaldo('ing')">disponible ahora · <span>ajustar ✎</span></div>
       <div class="p-row"><span>Balance del mes</span><b class="num" id="ingBal">—</b></div>
       <div class="p-row"><span>Quedará</span><b class="num" id="ingQueda">—</b></div>
     </div>
     <div class="panel uni">
       <div class="p-title"><i class="dt dt-uni"></i>UNICAJA</div>
       <div class="p-big num" id="uniDisp">—</div>
-      <div class="p-cap">disponible ahora</div>
+      <div class="p-cap p-adj" onclick="openAjusteSaldo('unicaja')">disponible ahora · <span>ajustar ✎</span></div>
       <div class="p-row"><span>Balance del mes</span><b class="num" id="uniBal">—</b></div>
       <div class="p-row"><span>Quedará</span><b class="num" id="uniQueda">—</b></div>
     </div>
     <div class="panel efe span2">
       <div class="p-title"><i class="dt dt-efe"></i>EFECTIVO</div>
       <div class="p-big num" id="efeDisp">—</div>
-      <div class="p-cap">disponible ahora</div>
+      <div class="p-cap p-adj" onclick="openAjusteSaldo('efectivo')">disponible ahora · <span>ajustar ✎</span></div>
       <div class="p-row"><span>Balance del mes</span><b class="num" id="efeBal">—</b></div>
       <div class="p-row"><span>Quedará</span><b class="num" id="efeQueda">—</b></div>
     </div>
@@ -623,6 +625,62 @@ function openFuturoDetail(){
   openModal('Comprometido a futuro',html);
 }
 
+// Disponible real de una cuenta (mismo cálculo que el panel), reutilizable
+function isoLocalD(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+function cargosFijoDesde(p,desde){
+  const now=new Date();const todayStr=isoLocalD(now);let s=0;
+  data.recurrentes.filter(r=>(r.pay||'ing')===p).forEach(r=>{
+    const d0=new Date(desde+'T00:00:00');let mm=new Date(d0.getFullYear(),d0.getMonth(),1);
+    while(mm<=now){
+      if(chargesIn(r,mm.getMonth())){
+        const eom=new Date(mm.getFullYear(),mm.getMonth()+1,0).getDate();
+        const fs=isoLocalD(new Date(mm.getFullYear(),mm.getMonth(),Math.min(Number(r.day)||1,eom)));
+        if(fs>=desde&&fs<=todayStr)s+=chargeAmt(r);
+      }
+      mm=new Date(mm.getFullYear(),mm.getMonth()+1,1);
+    }
+  });
+  return s;
+}
+function dispDe(p){
+  if(!data.saldos)return null;
+  const todayStr=isoLocalD(new Date());
+  const desde=data.saldos['desde_'+p]||data.saldos.desde;
+  const upTo=x=>x.date>=desde&&x.date<=todayStr;
+  const ing=data.ingresos.filter(i=>(i.pay||'ing')===p&&upTo(i)).reduce((s,i)=>s+netoOf(i),0);
+  const ex=data.extras.filter(e=>(e.pay||'ing')===p&&upTo(e)).reduce((s,e)=>s+(Number(e.amount)||0),0);
+  return (Number(data.saldos[p])||0)+ing-ex-cargosFijoDesde(p,desde);
+}
+let ajusteP='ing';
+function openAjusteSaldo(p){
+  const disp=dispDe(p);
+  const lbl=p==='efectivo'?'Efectivo':p==='unicaja'?'Unicaja':'ING';
+  if(disp==null){openModal('Saldo real · '+lbl,'<div class="form"><div class="wipe-note">Primero fija un saldo de partida en Ajustes ⚙.</div></div>');return;}
+  ajusteP=p;currentModal='ajusteSaldo';
+  openModal('Saldo real · '+lbl,`<div class="form">
+    <div class="prev">La app calcula que ahora tienes <b>${eur(disp)}</b> en ${lbl}. Si tu banco dice otra cosa (por los pagos pequeños sin apuntar), escribe el saldo real y cuadro la diferencia con un apunte «Ajuste de saldo».</div>
+    <div class="field"><label>¿Cuánto tienes ahora mismo en ${lbl}?</label><input id="aj_real" type="number" inputmode="decimal" step="0.01" placeholder="0,00" value="${disp.toFixed(2)}"></div>
+    <div id="aj_prev" class="ok-note"></div>
+    <div class="form-actions">
+      <button class="btn" onclick="closeModal()">Cancelar</button>
+      <button class="btn primary" onclick="saveAjusteSaldo()">Ajustar</button>
+    </div>
+  </div>`);
+  const inp=document.getElementById('aj_real');
+  const upd=()=>{const real=parseFloat(inp.value);const box=document.getElementById('aj_prev');const d=dispDe(ajusteP)-real;
+    if(isNaN(real)||Math.abs(d)<0.005){box.textContent='';return;}
+    box.textContent=d>0?('Apuntaré un gasto «Ajuste de saldo» de '+eur(d)+' (has gastado eso de más sin apuntar).'):('Apuntaré un ajuste a favor de '+eur(-d)+' (tienes más de lo calculado).');};
+  inp.oninput=upd;inp.focus();inp.select();
+}
+async function saveAjusteSaldo(){
+  const p=ajusteP||'ing';
+  const real=parseFloat(document.getElementById('aj_real').value);
+  if(isNaN(real)){formErr('Escribe el saldo real.');return;}
+  const diff=dispDe(p)-real;
+  if(Math.abs(diff)<0.005){closeModal();return;}
+  data.extras.push({id:uid(),name:'Ajuste de saldo',amount:diff,date:isoD(new Date()),category:'Otros',note:'Cuadre manual del saldo real',pay:p,ajuste:1});
+  await save();closeModal();render();
+}
 function render(){
   const now=new Date();const y=now.getFullYear(),m=now.getMonth();
   const isoLocal=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
@@ -677,30 +735,9 @@ function render(){
 
   // Disponible acumulado: cada fijo se descuenta en su d\u00eda de cobro de cada mes
   if(data.saldos){
-    const desdeOf=p=>data.saldos['desde_'+p]||data.saldos.desde;
-    const cargosFijo=(p,desde)=>{
-      let s=0;
-      data.recurrentes.filter(r=>(r.pay||'ing')===p).forEach(r=>{
-        const d0=new Date(desde+'T00:00:00');
-        let mm=new Date(d0.getFullYear(),d0.getMonth(),1);
-        while(mm<=now){
-          if(chargesIn(r,mm.getMonth())){
-            const eom=new Date(mm.getFullYear(),mm.getMonth()+1,0).getDate();
-            const fs=isoLocal(new Date(mm.getFullYear(),mm.getMonth(),Math.min(Number(r.day)||1,eom)));
-            if(fs>=desde&&fs<=todayStr)s+=chargeAmt(r);
-          }
-          mm=new Date(mm.getFullYear(),mm.getMonth()+1,1);
-        }
-      });
-      return s;
-    };
     let libreT=0;
     Object.keys(M).forEach(p=>{
-      const desde=desdeOf(p);
-      const upTo=x=>x.date>=desde&&x.date<=todayStr;
-      const fIng=data.ingresos.filter(i=>(i.pay||'ing')===p&&upTo(i)).reduce((s,i)=>s+netoOf(i),0);
-      const fEx=data.extras.filter(e=>(e.pay||'ing')===p&&upTo(e)).reduce((s,e)=>s+(Number(e.amount)||0),0);
-      const disp=(Number(data.saldos[p])||0)+fIng-fEx-cargosFijo(p,desde);
+      const disp=dispDe(p);
       document.getElementById(PRE[p]+'Disp').textContent=eur(disp);
       const queda=disp-M[p].pend;
       setQ(PRE[p]+'Queda',queda);
@@ -1137,9 +1174,11 @@ async function savePasted(){
   if(upd&&upd.checked&&pastedMeta.saldo!=null){
     const cta=pastedMeta.cuenta||'ing';
     const fecha=pastedMeta.fecha||isoD(new Date());
+    // el saldo es el de FIN de ese día: ancla al día siguiente para no restar lo ya incluido
+    const dNext=new Date(fecha+'T00:00:00');dNext.setDate(dNext.getDate()+1);
     if(!data.saldos)data.saldos={ing:0,unicaja:0,efectivo:0,desde:fecha};
     data.saldos[cta]=pastedMeta.saldo;
-    data.saldos['desde_'+cta]=fecha;
+    data.saldos['desde_'+cta]=isoD(dNext);
     saldoUpd=true;
   }
   if(!n&&!saldoUpd){formErr('No hay nada marcado para guardar.');return;}
