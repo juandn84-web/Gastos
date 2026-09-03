@@ -1,6 +1,6 @@
-const C='gastos-v11';
+const C='gastos-v12';
 self.addEventListener('install',e=>{
-  e.waitUntil(caches.open(C).then(c=>c.addAll(['./','./index.html','./icon.png'])));
+  e.waitUntil(caches.open(C).then(c=>c.addAll(['./','./index.html','./icon.png','./xlsx.min.js'])));
   self.skipWaiting();
 });
 self.addEventListener('activate',e=>{
