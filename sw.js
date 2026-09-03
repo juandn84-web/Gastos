@@ -1,4 +1,4 @@
-const C='gastos-v17';
+const C='gastos-v18';
 self.addEventListener('install',e=>{
   e.waitUntil(caches.open(C).then(c=>c.addAll(['./','./index.html','./icon.png'])));
   self.skipWaiting();

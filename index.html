@@ -67,6 +67,10 @@
   .p-adj span{color:var(--moca);font-weight:600;text-decoration:underline;text-underline-offset:2px}
   .ver-tag{position:fixed;right:14px;bottom:9px;font-size:10.5px;color:var(--faint);opacity:.55;z-index:1;pointer-events:none;font-variant-numeric:tabular-nums;letter-spacing:.02em}
   .cob-head{display:flex;justify-content:space-between;align-items:baseline;margin-top:18px;font-size:12.5px;color:var(--muted)}
+  .saldo-hero{display:flex;justify-content:space-between;align-items:baseline;background:var(--surface);border-radius:20px;padding:14px 16px;box-shadow:var(--shadow);margin-top:2px}
+  .saldo-hero span{font-size:12.5px;color:var(--muted)}
+  .saldo-hero b{font-size:26px;font-weight:300;letter-spacing:-.01em;color:var(--ink)}
+  .aj-toggle{margin-top:16px;text-align:center;font-size:12.5px;color:var(--muted);text-decoration:underline;text-underline-offset:3px;cursor:pointer;padding:8px 0}
   .cob-head b{color:var(--gasto);font-weight:700;font-size:15px}
   .cob-list{margin-top:2px;max-height:230px;overflow:auto;padding-right:2px}
   .cob-empty{margin-top:8px;font-size:12.5px;color:var(--faint);background:#F4EFE7;border-radius:14px;padding:12px 13px}
@@ -315,7 +319,7 @@
 
 <script>
 const KEY='gastos:data';
-const APP_VERSION='17';
+const APP_VERSION='18';
 // Dentro de Claude usa window.storage; abierta en local (descargada) usa el almacenamiento del navegador.
 const store=(typeof window!=='undefined'&&window.storage)?window.storage:{
   get:async k=>{const v=localStorage.getItem(k);return v===null?null:{key:k,value:v};},
@@ -694,21 +698,39 @@ function openAjusteSaldo(p){
           <div class="pd-amt">${eur(c.amount)}</div>
         </div>`).join('')}</div>`
       :'<div class="cob-empty">Nada cobrado aún este mes.</div>');
-  openModal('Saldo real · '+lbl,`<div class="form">
-    <div class="prev">La app calcula que ahora tienes <b>${eur(disp)}</b> en ${lbl}. Si tu banco dice otra cosa (por los pagos pequeños sin apuntar), escribe el saldo real y cuadro la diferencia con un apunte «Ajuste de saldo».</div>
-    <div class="field"><label>¿Cuánto tienes ahora mismo en ${lbl}?</label><input id="aj_real" type="number" inputmode="decimal" step="0.01" placeholder="0,00" value="${disp.toFixed(2)}"></div>
-    <div id="aj_prev" class="ok-note"></div>
+  openModal(lbl+' · este mes',`<div class="form">
+    <div class="saldo-hero"><span>Disponible ahora</span><b>${eur(disp)}</b></div>
     ${cobHtml}
-    <div class="form-actions">
-      <button class="btn" onclick="closeModal()">Cancelar</button>
-      <button class="btn primary" onclick="saveAjusteSaldo()">Ajustar</button>
+    <div class="aj-toggle" id="ajToggle" onclick="toggleAjuste()">¿No cuadra con tu banco? Ajustar saldo ✎</div>
+    <div id="ajBox" class="hidden">
+      <div class="tot-note">Escribe lo que tienes de verdad en ${lbl} y cuadro la diferencia con un apunte «Ajuste de saldo».</div>
+      <div class="field"><label>Saldo real en ${lbl}</label><input id="aj_real" type="number" inputmode="decimal" step="0.01" placeholder="0,00" value="${disp.toFixed(2)}"></div>
+      <div id="aj_prev" class="ok-note"></div>
+      <div class="form-actions">
+        <button class="btn" onclick="closeModal()">Cancelar</button>
+        <button class="btn primary" onclick="saveAjusteSaldo()">Ajustar</button>
+      </div>
     </div>
   </div>`);
   const inp=document.getElementById('aj_real');
   const upd=()=>{const real=parseFloat(inp.value);const box=document.getElementById('aj_prev');const d=dispDe(ajusteP)-real;
     if(isNaN(real)||Math.abs(d)<0.005){box.textContent='';return;}
     box.textContent=d>0?('Apuntaré un gasto «Ajuste de saldo» de '+eur(d)+' (has gastado eso de más sin apuntar).'):('Apuntaré un ajuste a favor de '+eur(-d)+' (tienes más de lo calculado).');};
-  inp.oninput=upd;inp.focus();inp.select();
+  inp.oninput=upd;
+}
+function toggleAjuste(){
+  const box=document.getElementById('ajBox'),tg=document.getElementById('ajToggle');
+  if(!box)return;
+  box.classList.toggle('hidden');
+  const open=!box.classList.contains('hidden');
+  tg.textContent=open?'Cancelar ajuste':'¿No cuadra con tu banco? Ajustar saldo ✎';
+  if(open){const i=document.getElementById('aj_real');if(i){i.focus();i.select();}}
+}
+function toggleIniciales(){
+  const box=document.getElementById('iniBox'),tg=document.getElementById('iniToggle');
+  if(!box)return;
+  box.classList.toggle('hidden');
+  tg.textContent=box.classList.contains('hidden')?'Configuración inicial de saldos ⌄':'Ocultar configuración inicial ⌃';
 }
 async function saveAjusteSaldo(){
   const p=ajusteP||'ing';
@@ -1275,21 +1297,7 @@ function openAjustes(){
   const s=data.saldos||{};
   const today=new Date().toISOString().slice(0,10);
   openModal('Ajustes',`<div class="form" style="margin-top:2px">
-    <div class="aj-h">Saldos iniciales <span style="float:right;font-weight:600;color:var(--faint);font-size:11.5px">versión ${APP_VERSION}</span></div>
-    <div class="two">
-      <div class="field"><label>ING (€)</label><input id="s_ing" type="number" inputmode="decimal" step="0.01" placeholder="0,00" value="${s.ing??''}"></div>
-      <div class="field"><label>Unicaja (€)</label><input id="s_uni" type="number" inputmode="decimal" step="0.01" placeholder="0,00" value="${s.unicaja??''}"></div>
-    </div>
-    <div class="field"><label>Efectivo (€)</label><input id="s_cash" type="number" inputmode="decimal" step="0.01" placeholder="0,00" value="${s.efectivo??''}"></div>
-    <div class="field"><label>Fecha del saldo</label><input id="s_desde" type="date" value="${s.desde||today}"></div>
-    <div class="tot-note">Pon lo que tienes hoy en el banco y en la cartera. A partir de esa fecha, la app suma ingresos y resta gastos. Lo apuntado con fecha futura no descuenta hasta que llegue el día.</div>
-    <div class="form-actions">
-      <button class="btn" onclick="closeModal()">Cerrar</button>
-      <button class="btn primary" onclick="saveSaldos()">Guardar saldos</button>
-    </div>
-
-    <div class="aj-sep"></div>
-    <div class="aj-h">Copia de seguridad</div>
+    <div class="aj-h">Copia de seguridad <span style="float:right;font-weight:600;color:var(--faint);font-size:11.5px">versión ${APP_VERSION}</span></div>
     <div class="aj-btns">
       <button class="btn primary" onclick="hacerCopia()">Hacer copia</button>
       <button class="btn" onclick="abrirRecuperar()">Recuperar copia</button>
@@ -1299,6 +1307,22 @@ function openAjustes(){
     <div class="aj-sep"></div>
     <div class="aj-h">Zona peligrosa</div>
     <button class="btn" id="wipeBtn" onclick="borrarTodo()" style="width:100%;color:var(--danger)">Borrar todos los datos</button>
+
+    <div class="aj-sep"></div>
+    <div class="aj-toggle" id="iniToggle" onclick="toggleIniciales()">Configuración inicial de saldos ⌄</div>
+    <div id="iniBox" class="hidden">
+      <div class="tot-note">Solo hace falta al empezar de cero, para fijar el punto de partida. En el día a día usa «Ajustar saldo» pulsando sobre cada cuenta.</div>
+      <div class="two">
+        <div class="field"><label>ING (€)</label><input id="s_ing" type="number" inputmode="decimal" step="0.01" placeholder="0,00" value="${s.ing??''}"></div>
+        <div class="field"><label>Unicaja (€)</label><input id="s_uni" type="number" inputmode="decimal" step="0.01" placeholder="0,00" value="${s.unicaja??''}"></div>
+      </div>
+      <div class="field"><label>Efectivo (€)</label><input id="s_cash" type="number" inputmode="decimal" step="0.01" placeholder="0,00" value="${s.efectivo??''}"></div>
+      <div class="field"><label>Fecha del saldo</label><input id="s_desde" type="date" value="${s.desde||today}"></div>
+      <div class="form-actions">
+        <button class="btn" onclick="toggleIniciales()">Cancelar</button>
+        <button class="btn primary" onclick="saveSaldos()">Guardar saldos</button>
+      </div>
+    </div>
   </div>`);
 }
 async function saveSaldos(){
