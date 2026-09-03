@@ -315,7 +315,7 @@
 
 <script>
 const KEY='gastos:data';
-const APP_VERSION='16';
+const APP_VERSION='17';
 // Dentro de Claude usa window.storage; abierta en local (descargada) usa el almacenamiento del navegador.
 const store=(typeof window!=='undefined'&&window.storage)?window.storage:{
   get:async k=>{const v=localStorage.getItem(k);return v===null?null:{key:k,value:v};},
@@ -382,16 +382,17 @@ async function load(){
   }
   // Corrección 09/08/2026: la nómina se apunta a mano cada mes; se retira la autocargada.
   if(data.ingresos.some(i=>i.id==='i_nom_202608')){data.ingresos=data.ingresos.filter(i=>i.id!=='i_nom_202608');if(!readError)await save();}
-  // Fusiona la semilla: añade lo que aún no esté (por id), sin tocar lo demás.
-  let changed=false;
-  SEED.recurrentes.forEach(s=>{
-    if(!data.recurrentes.some(r=>r.id===s.id)){data.recurrentes.push({...s});changed=true;}
-  });
-  (SEED.ingresos||[]).forEach(s=>{
-    if(!data.ingresos.some(i=>i.id===s.id)){data.ingresos.push({...s});changed=true;}
-  });
-  // Solo auto-guardamos la semilla si la lectura fue limpia (para no machacar datos que existan).
-  if(changed&&!readError)await save();
+  // La semilla SOLO se aplica en una instalación nueva. Nunca se re-inyecta después,
+  // para que lo que borres (o una copia restaurada) se respete tal cual.
+  if(!hadData&&!readError){
+    data.recurrentes=SEED.recurrentes.map(s=>({...s}));
+    data.ingresos=(SEED.ingresos||[]).map(s=>({...s}));
+    data.seeded=true;
+    await save();
+  }else if(!data.seeded&&!readError){
+    data.seeded=true;                       // datos previos: marcamos y no volvemos a sembrar
+    await save();
+  }
   render();
 }
 async function save(){
@@ -1274,7 +1275,7 @@ function openAjustes(){
   const s=data.saldos||{};
   const today=new Date().toISOString().slice(0,10);
   openModal('Ajustes',`<div class="form" style="margin-top:2px">
-    <div class="aj-h">Saldos iniciales</div>
+    <div class="aj-h">Saldos iniciales <span style="float:right;font-weight:600;color:var(--faint);font-size:11.5px">versión ${APP_VERSION}</span></div>
     <div class="two">
       <div class="field"><label>ING (€)</label><input id="s_ing" type="number" inputmode="decimal" step="0.01" placeholder="0,00" value="${s.ing??''}"></div>
       <div class="field"><label>Unicaja (€)</label><input id="s_uni" type="number" inputmode="decimal" step="0.01" placeholder="0,00" value="${s.unicaja??''}"></div>
@@ -1375,8 +1376,20 @@ async function loadBackup(){
   try{
     const d=JSON.parse(document.getElementById('bk').value);
     if(!d||typeof d!=='object'||Array.isArray(d))throw 0;
-    data={recurrentes:d.recurrentes||[],extras:d.extras||[],ingresos:d.ingresos||[],caja:d.caja||[],saldos:d.saldos||null};
-    await save();closeModal();render();
+    data={recurrentes:d.recurrentes||[],extras:d.extras||[],ingresos:d.ingresos||[],caja:d.caja||[],saldos:d.saldos||null,seeded:true};
+    await save();
+    // Verificamos leyendo de vuelta: si no cuadra, avisamos en vez de fingir que fue bien.
+    let ok=false;
+    try{
+      const chk=await store.get(KEY);
+      if(chk&&chk.value){const v=JSON.parse(chk.value);ok=(v.extras||[]).length===data.extras.length&&(v.recurrentes||[]).length===data.recurrentes.length;}
+    }catch(e){}
+    if(!ok){
+      if(slot)slot.innerHTML='<div class="wipe-note">La copia se cargó en pantalla pero <b>no se pudo guardar</b> en este dispositivo. Si estás en modo privado, ciérralo y repite.</div>';
+      render();return;
+    }
+    closeModal();render();
+    setTimeout(()=>alert('Copia restaurada y guardada ✅\n'+data.recurrentes.length+' fijos · '+data.extras.length+' puntuales · '+data.ingresos.length+' ingresos'),150);
   }catch(e){if(slot)slot.innerHTML='<div class="wipe-note">Ese texto no es una copia válida.</div>';}
 }
 
